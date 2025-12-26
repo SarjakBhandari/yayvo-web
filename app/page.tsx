@@ -1,12 +1,13 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Page() {
   return (
-    <div>
-      {/* Header */}
-      <header>
-        <div className="container inner">
-          <div className="logo flex items-center gap-2">
+    <div className="home-layout">
+      {/* AppBar / Header */}
+      <header className="appbar">
+        <div className="appbar-inner">
+          <div className="appbar-left">
             <Image
               src="/images/logo.png"
               alt="Yayvo Logo"
@@ -14,26 +15,26 @@ export default function Page() {
               height={40}
               priority
             />
-            <span>Yayvo</span>
+            <span className="appbar-title">Yayvo</span>
           </div>
-
-          {/* These buttons can be hidden on mobile if desired */}
-          <div className="flex gap-4 hide-on-mobile">
-            <button className="btn btn-outline">Login</button>
-            <button className="btn btn-primary">Get Started</button>
-          </div>
+          <nav className="appbar-nav hide-on-mobile">
+            <Link href="/login" className="appbar-link">
+              Login
+            </Link>
+          </nav>
         </div>
       </header>
 
-      {/* Hero */}
+      {/* Hero Section */}
       <section className="hero">
         <h1>
           Products That <span>Feel Right</span>
         </h1>
         <p>
-          Express how products make you feel with emojis, stories, and authentic sentiment.
+          Express how products make you feel with icons, stories, and authentic
+          sentiment.
         </p>
-        <p className="mt-4 text-lg text-gray-600">
+        <p className="hero-subtext">
           Instead of star ratings, Yayvo highlights{" "}
           <strong>sentiment-based reviews</strong> — showing how products truly
           make people feel.
@@ -41,15 +42,19 @@ export default function Page() {
 
         {/* Centered button group */}
         <div className="button-group">
-          <button className="btn btn-primary">Start as Consumer</button>
-          <button className="btn btn-primary">Start as Retailer</button>
-          <button className="btn btn-outline">
+          <Link href="/registration/consumer" className="btn btn-primary">
+            Start as Consumer
+          </Link>
+          <Link href="/registration/retailer" className="btn btn-primary">
+            Start as Retailer
+          </Link>
+          <Link href="/login" className="btn btn-outline">
             Already have an account? Login
-          </button>
+          </Link>
         </div>
       </section>
 
-      {/* Features */}
+      {/* Features Section */}
       <section className="section container grid-3">
         <div className="card">
           <h3>Emotion-First Discovery</h3>
@@ -69,7 +74,7 @@ export default function Page() {
       </section>
 
       {/* Footer */}
-      <footer>
+      <footer className="auth-footer">
         <p>
           © {new Date().getFullYear()} Yayvo — Lifestyle discovery through
           emotional design · Web API coursework
