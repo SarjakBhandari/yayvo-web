@@ -171,6 +171,7 @@ body {
 .hero h1 span {
   background: linear-gradient(to right, #9333ea, #ec4899, #f97316);
   -webkit-background-clip: text;
+  background-clip: text;
   color: transparent;
 }
 
