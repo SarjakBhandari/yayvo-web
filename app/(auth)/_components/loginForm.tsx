@@ -60,7 +60,7 @@ export default function LoginForm() {
       <div className="auth-footer-links">
         <p>
           Don&apos;t have an account?{" "}
-          <Link href="/auth/register">Create Account</Link>
+          <Link href="/">Create Account</Link>
         </p>
       </div>
     </form></div>

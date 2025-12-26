@@ -18,11 +18,8 @@ export default function Page() {
             <span className="appbar-title">Yayvo</span>
           </div>
           <nav className="appbar-nav hide-on-mobile">
-            <Link href="/auth/login" className="appbar-link">
+            <Link href="/login" className="appbar-link">
               Login
-            </Link>
-            <Link href="/auth/register" className="appbar-link">
-              Get Started
             </Link>
           </nav>
         </div>
@@ -45,10 +42,10 @@ export default function Page() {
 
         {/* Centered button group */}
         <div className="button-group">
-          <Link href="/auth/register" className="btn btn-primary">
+          <Link href="/registration/consumer" className="btn btn-primary">
             Start as Consumer
           </Link>
-          <Link href="/auth/register" className="btn btn-primary">
+          <Link href="/registration/retailer" className="btn btn-primary">
             Start as Retailer
           </Link>
           <Link href="/login" className="btn btn-outline">
