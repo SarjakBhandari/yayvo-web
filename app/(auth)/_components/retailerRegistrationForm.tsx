@@ -27,11 +27,20 @@ export default function RetailerRegisterForm() {
     handleSubmit,
     formState: { errors },
     setValue,
-    handleFormSubmit,
-  } = useRetailerRegister();
+    onSubmit,   // renamed for consistency with consumer hook
+    errs,
+  } = useRetailerRegister((res) => {
+    // success callback
+    alert("Registration successful!");
+  });
+
+  // show error alert if registration fails
+  if (errs) {
+    alert(errs);
+  }
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="auth-form">
+    <form onSubmit={handleSubmit(onSubmit)} className="auth-form">
       {/* Owner Name */}
       <div className="form-group">
         <label>Owner Name</label>
@@ -47,9 +56,9 @@ export default function RetailerRegisterForm() {
         <label>Organization Name</label>
         <div className="input-icon">
           <Briefcase className="icon" />
-          <input type="text" {...register("orgName")} />
+          <input type="text" {...register("organizationName")} />
         </div>
-        {errors.orgName && <p className="form-error">{errors.orgName.message}</p>}
+        {errors.organizationName && <p className="form-error">{errors.organizationName.message}</p>}
       </div>
 
       {/* Email */}
@@ -69,11 +78,11 @@ export default function RetailerRegisterForm() {
           <Calendar className="icon" />
           <input
             type="date"
-            {...register("doe")}
-            onChange={(e) => setValue("doe", e.target.value)}
+            {...register("dateOfEstablishment")}
+            onChange={(e) => setValue("dateOfEstablishment", e.target.value)}
           />
         </div>
-        {errors.doe && <p className="form-error">{errors.doe.message}</p>}
+        {errors.dateOfEstablishment && <p className="form-error">{errors.dateOfEstablishment.message}</p>}
       </div>
 
       {/* Country */}
