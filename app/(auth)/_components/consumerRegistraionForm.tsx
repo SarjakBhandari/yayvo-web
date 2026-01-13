@@ -29,6 +29,7 @@ export default function ConsumerRegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="auth-form">
       {/* Name */}
