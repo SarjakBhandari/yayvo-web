@@ -19,8 +19,7 @@ const countries = [
 ];
 
 export default function RetailerRegisterForm() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
 
   const {
     register,
@@ -108,16 +107,10 @@ export default function RetailerRegisterForm() {
         <div className="input-icon">
           <Lock className="icon" />
           <input
-            type={showPassword ? "text" : "password"}
+            type="password"
             {...register("password")}
           />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            style={{ background: "transparent", border: "none", cursor: "pointer" }}
-          >
-            {showPassword ? "Hide" : "Show"}
-          </button>
+         
         </div>
         {errors.password && <p className="form-error">{errors.password.message}</p>}
       </div>
@@ -128,16 +121,10 @@ export default function RetailerRegisterForm() {
         <div className="input-icon">
           <Lock className="icon" />
           <input
-            type={showConfirmPassword ? "text" : "password"}
+            type= "password"
             {...register("confirmPassword")}
           />
-          <button
-            type="button"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            style={{ background: "transparent", border: "none", cursor: "pointer" }}
-          >
-            {showConfirmPassword ? "Hide" : "Show"}
-          </button>
+        
         </div>
         {errors.confirmPassword && (
           <p className="form-error">{errors.confirmPassword.message}</p>
