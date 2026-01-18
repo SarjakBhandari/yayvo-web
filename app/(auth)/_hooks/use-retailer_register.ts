@@ -26,17 +26,10 @@ export function useRetailerRegister(onSuccess?: (res: AuthResponse) => void) {
         throw new Error(res.message || "Registration Failed");
       }
 
-      if (res.token) {
-        localStorage.setItem("authToken", res.token);
-      }
-
-      // optional success callback
       if (onSuccess) onSuccess(res);
 
-      // redirect based on user role/type
-      const userType = res.user?.role || "retailer";
       startTransition(() => {
-        router.push(`/welcome/${userType}`);
+        router.push(`/login`);
       });
     } catch (err: unknown) {
       if (err instanceof Error) {

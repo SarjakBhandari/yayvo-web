@@ -1,10 +1,30 @@
+"use server";
+
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getAuthToken, getUserData } from "@/lib/cookie";
+import { handleLogout } from "@/lib/actions/auth-actions";
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default async function AuthLayout({ children }: { children: React.ReactNode }) {
+  const token = await getAuthToken();
+  const user = await getUserData();
+
+  if (token && user) {
+    if (user.role === "consumer") {
+      redirect("/consumer");
+    } else if (user.role === "retailer") {
+      redirect("/retailer");
+    } else if (user.role === "admin") {
+      redirect("/admin");
+    } else {
+      await handleLogout();
+      redirect("/login")
+    }
+  }
+
   return (
     <div className="auth-layout">
-      {/* AppBar */}
       <header className="appbar">
         <div className="appbar-inner">
           <div className="appbar-left">
@@ -16,15 +36,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </nav>
         </div>
       </header>
-
-      {/* Main content */}
       <main className="auth-container">{children}</main>
-
-      {/* Footer */}
       <footer className="auth-footer">
-        <p>
-          © {new Date().getFullYear()} Yayvo — Lifestyle discovery through emotional design
-        </p>
+        <p>© {new Date().getFullYear()} Yayvo — Lifestyle discovery through emotional design</p>
       </footer>
     </div>
   );
