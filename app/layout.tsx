@@ -1,11 +1,16 @@
-import './globals.css';
+// app/layout.tsx
+import "./globals.css";
 
 export const metadata = {
-  title: 'Yayvo',
-  description: 'Lifestyle discovery through emotional design ',
+  title: "Yayvo",
+  description: "Lifestyle discovery through emotional design",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body>{children}</body>

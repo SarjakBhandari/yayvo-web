@@ -1,37 +1,32 @@
 "use client";
-
 import { useState } from "react";
 import Link from "next/link";
-import { Mail, Lock, User, Briefcase, Calendar, MapPin } from "lucide-react";
+import { Mail, Lock, User, Briefcase, Calendar, MapPin, Phone, Image as ImageIcon } from "lucide-react";
 import { useRetailerRegister } from "../_hooks/use-retailer_register";
 
 const countries = [
-  "Nepal",
-  "India",
-  "China",
-  "United States",
-  "United Kingdom",
-  "Australia",
-  "Canada",
-  "Germany",
-  "France",
-  "Japan",
+  "Nepal", "India", "China", "United States", "United Kingdom",
+  "Australia", "Canada", "Germany", "France", "Japan",
 ];
 
 export default function RetailerRegisterForm() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
-    handleFormSubmit,
-  } = useRetailerRegister();
+    onSubmit,
+    errs,
+  } = useRetailerRegister((res) => {
+    alert("Registration successful!");
+  });
+
+  if (errs) {
+    alert(errs);
+  }
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="auth-form">
+    <form onSubmit={handleSubmit(onSubmit)} className="auth-form">
       {/* Owner Name */}
       <div className="form-group">
         <label>Owner Name</label>
@@ -47,9 +42,29 @@ export default function RetailerRegisterForm() {
         <label>Organization Name</label>
         <div className="input-icon">
           <Briefcase className="icon" />
-          <input type="text" {...register("orgName")} />
+          <input type="text" {...register("organizationName")} />
         </div>
-        {errors.orgName && <p className="form-error">{errors.orgName.message}</p>}
+        {errors.organizationName && <p className="form-error">{errors.organizationName.message}</p>}
+      </div>
+
+      {/* Username */}
+      <div className="form-group">
+        <label>Username</label>
+        <div className="input-icon">
+          <User className="icon" />
+          <input type="text" {...register("username")} />
+        </div>
+        {errors.username && <p className="form-error">{errors.username.message}</p>}
+      </div>
+
+      {/* Phone Number */}
+      <div className="form-group">
+        <label>Phone Number</label>
+        <div className="input-icon">
+          <Phone className="icon" />
+          <input type="text" {...register("phoneNumber")} />
+        </div>
+        {errors.phoneNumber && <p className="form-error">{errors.phoneNumber.message}</p>}
       </div>
 
       {/* Email */}
@@ -69,11 +84,11 @@ export default function RetailerRegisterForm() {
           <Calendar className="icon" />
           <input
             type="date"
-            {...register("doe")}
-            onChange={(e) => setValue("doe", e.target.value)}
+            {...register("dateOfEstablishment")}
+            onChange={(e) => setValue("dateOfEstablishment", e.target.value)}
           />
         </div>
-        {errors.doe && <p className="form-error">{errors.doe.message}</p>}
+        {errors.dateOfEstablishment && <p className="form-error">{errors.dateOfEstablishment.message}</p>}
       </div>
 
       {/* Country */}
@@ -84,13 +99,21 @@ export default function RetailerRegisterForm() {
           <select {...register("country")}>
             <option value="">Select Country</option>
             {countries.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
+              <option key={c} value={c}>{c}</option>
             ))}
           </select>
         </div>
         {errors.country && <p className="form-error">{errors.country.message}</p>}
+      </div>
+
+      {/* Profile Picture */}
+      <div className="form-group">
+        <label>Profile Picture URL</label>
+        <div className="input-icon">
+          <ImageIcon className="icon" />
+          <input type="text" {...register("profilePicture")} />
+        </div>
+        {errors.profilePicture && <p className="form-error">{errors.profilePicture.message}</p>}
       </div>
 
       {/* Password */}
@@ -98,17 +121,7 @@ export default function RetailerRegisterForm() {
         <label>Password</label>
         <div className="input-icon">
           <Lock className="icon" />
-          <input
-            type={showPassword ? "text" : "password"}
-            {...register("password")}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            style={{ background: "transparent", border: "none", cursor: "pointer" }}
-          >
-            {showPassword ? "Hide" : "Show"}
-          </button>
+          <input type="password" {...register("password")} />
         </div>
         {errors.password && <p className="form-error">{errors.password.message}</p>}
       </div>
@@ -118,21 +131,9 @@ export default function RetailerRegisterForm() {
         <label>Confirm Password</label>
         <div className="input-icon">
           <Lock className="icon" />
-          <input
-            type={showConfirmPassword ? "text" : "password"}
-            {...register("confirmPassword")}
-          />
-          <button
-            type="button"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            style={{ background: "transparent", border: "none", cursor: "pointer" }}
-          >
-            {showConfirmPassword ? "Hide" : "Show"}
-          </button>
+          <input type="password" {...register("confirmPassword")} />
         </div>
-        {errors.confirmPassword && (
-          <p className="form-error">{errors.confirmPassword.message}</p>
-        )}
+        {errors.confirmPassword && <p className="form-error">{errors.confirmPassword.message}</p>}
       </div>
 
       <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>

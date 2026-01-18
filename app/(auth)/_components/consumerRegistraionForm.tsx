@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { Mail, Lock, User } from "lucide-react";
+import { Mail, Lock, User, Phone } from "lucide-react";
 import { useConsumerRegister } from "../_hooks/use-consumer_register";
 
 const countries = [
@@ -24,21 +23,37 @@ export default function ConsumerRegisterForm() {
     handleSubmit,
     formState: { errors },
     onSubmit,
-  } = useConsumerRegister();
+    errs
+  } = useConsumerRegister(() => {
+    // success callback
+    alert("Registration successful!");
+  });
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // watch for errors and show alert
+  if (errs) {
+    alert(errs);
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="auth-form">
-      {/* Name */}
+      {/* Full Name */}
       <div className="form-group">
-        <label>Name</label>
+        <label>Full Name</label>
         <div className="input-icon">
           <User className="icon" />
-          <input type="text" {...register("name")} />
+          <input type="text" {...register("fullName")} />
         </div>
-        {errors.name && <p className="form-error">{errors.name.message}</p>}
+        {errors.fullName && <p className="form-error">{errors.fullName.message}</p>}
+      </div>
+
+      {/* Username */}
+      <div className="form-group">
+        <label>Username</label>
+        <div className="input-icon">
+          <User className="icon" />
+          <input type="text" {...register("username")} />
+        </div>
+        {errors.username && <p className="form-error">{errors.username.message}</p>}
       </div>
 
       {/* Email */}
@@ -51,6 +66,16 @@ export default function ConsumerRegisterForm() {
         {errors.email && <p className="form-error">{errors.email.message}</p>}
       </div>
 
+      {/* Phone Number */}
+      <div className="form-group">
+        <label>Phone Number</label>
+        <div className="input-icon">
+          <Phone className="icon" />
+          <input type="tel" {...register("phoneNumber")} />
+        </div>
+        {errors.phoneNumber && <p className="form-error">{errors.phoneNumber.message}</p>}
+      </div>
+
       {/* Date of Birth */}
       <div className="form-group">
         <label>Date of Birth</label>
@@ -61,11 +86,11 @@ export default function ConsumerRegisterForm() {
       {/* Gender */}
       <div className="form-group">
         <label>Gender</label>
-        <div className="flex gap-4">
+        <div className="flex gap-6">
           {["Male", "Female", "Other"].map((g) => (
-            <label key={g} className="flex items-center gap-1">
+            <label key={g} className="flex items-center gap-2">
               <input type="radio" value={g} {...register("gender")} />
-              {g}
+              <span>{g}</span>
             </label>
           ))}
         </div>
@@ -91,17 +116,7 @@ export default function ConsumerRegisterForm() {
         <label>Password</label>
         <div className="input-icon">
           <Lock className="icon" />
-          <input
-            type={showPassword ? "text" : "password"}
-            {...register("password")}
-          />
-          <button
-            type="button"
-            className="text-sm"
-            onClick={() => setShowPassword(!showPassword)}
-          >
-            {showPassword ? "Hide" : "Show"}
-          </button>
+          <input type="password" {...register("password")} />
         </div>
         {errors.password && <p className="form-error">{errors.password.message}</p>}
       </div>
@@ -111,17 +126,7 @@ export default function ConsumerRegisterForm() {
         <label>Confirm Password</label>
         <div className="input-icon">
           <Lock className="icon" />
-          <input
-            type={showConfirmPassword ? "text" : "password"}
-            {...register("confirmPassword")}
-          />
-          <button
-            type="button"
-            className="text-sm"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-          >
-            {showConfirmPassword ? "Hide" : "Show"}
-          </button>
+          <input type="password" {...register("confirmPassword")} />
         </div>
         {errors.confirmPassword && (
           <p className="form-error">{errors.confirmPassword.message}</p>

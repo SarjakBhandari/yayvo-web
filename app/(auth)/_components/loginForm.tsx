@@ -4,18 +4,18 @@ import Link from "next/link";
 import { useLoginForm } from "../_hooks/use-login";
 import Image from "next/image";
 
-
 export default function LoginForm() {
   const {
     email,
     password,
+    error,
     handleEmail,
     handlePassword,
     handleSubmit,
   } = useLoginForm();
 
   return (
-        <div className="auth-card">
+    <div className="auth-card">
       <div className="auth-left">
         <Image
           src="/images/logo.png"
@@ -26,45 +26,59 @@ export default function LoginForm() {
         />
         <h1 className="auth-title">Welcome!</h1>
       </div>
-      <div className="auth-right"> <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        handleSubmit();
-      }}
-      className="auth-form"
-    >
-      <div className="form-group">
-        <label>Email</label>
-        <div className="input-icon">
-          <Mail className="icon" />
-          <input type="email" value={email} onChange={handleEmail} />
-        </div>
-      </div>
 
-      <div className="form-group">
-        <label>Password</label>
-        <div className="input-icon">
-          <Lock className="icon" />
-          <input type="password" value={password} onChange={handlePassword} />
-        </div>
-      </div>
+      <div className="auth-right">
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            await handleSubmit();
+          }}
+          className="auth-form"
+        >
+          <div className="form-group">
+            <label>Email</label>
+            <div className="input-icon">
+              <Mail className="icon" />
+              <input
+                type="email"
+                value={email}
+                onChange={handleEmail}
+                placeholder="Enter your email"
+              />
+            </div>
+          </div>
 
-      <div className="form-links text-right">
-        <Link href="/auth/forgot">Forgot Password?</Link>
-      </div>
+          <div className="form-group">
+            <label>Password</label>
+            <div className="input-icon">
+              <Lock className="icon" />
+              <input
+                type="password"
+                value={password}
+                onChange={handlePassword}
+                placeholder="Enter your password"
+              />
+            </div>
+          </div>
 
-      <button type="submit" className="btn btn-primary">
-        Login
-      </button>
+          {error && <p className="form-error">{error}</p>}
 
-      <div className="auth-footer-links">
-        <p>
-          Don&apos;t have an account?{" "}
-          <Link href="/">Create Account</Link>
-        </p>
+          <div className="form-links text-right">
+            <Link href="/auth/forgot">Forgot Password?</Link>
+          </div>
+
+          <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>
+            Login
+          </button>
+
+          <div className="auth-footer-links" style={{ marginTop: "15px" }}>
+            <p>
+              Don&apos;t have an account?{" "}
+              <Link href="/">Create Account</Link>
+            </p>
+          </div>
+        </form>
       </div>
-    </form></div>
     </div>
-   
   );
 }
