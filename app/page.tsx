@@ -1,7 +1,31 @@
+// app/page.tsx
+"use server";
+
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getAuthToken, getUserData } from "@/lib/cookie";
 
-export default function Page() {
+export default async function Page() {
+  // Check cookies using your cookie.ts helpers
+  const token = await getAuthToken();
+  const user = await getUserData();
+
+  // If user is logged in → redirect to dashboard
+  if (token && user) {
+    // You can redirect based on role if needed
+    if (user.role === "consumer") {
+      redirect("/consumer/");
+    } else if (user.role === "retailer") {
+      redirect("/retailer/");
+    } else if (user.role === "admin") {
+      redirect("/admin/");
+    } else {
+      redirect("/dashboard"); // fallback
+    }
+  }
+
+  // If not logged in → show landing page
   return (
     <div className="home-layout">
       {/* AppBar / Header */}
