@@ -106,15 +106,6 @@ export default function RetailerRegisterForm() {
         {errors.country && <p className="form-error">{errors.country.message}</p>}
       </div>
 
-      {/* Profile Picture */}
-      <div className="form-group">
-        <label>Profile Picture URL</label>
-        <div className="input-icon">
-          <ImageIcon className="icon" />
-          <input type="text" {...register("profilePicture")} />
-        </div>
-        {errors.profilePicture && <p className="form-error">{errors.profilePicture.message}</p>}
-      </div>
 
       {/* Password */}
       <div className="form-group">

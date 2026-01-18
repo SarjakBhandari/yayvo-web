@@ -21,7 +21,7 @@ export default async function Page() {
               height={40}
               priority
             />
-            <span className="appbar-title">Yayvo</span>
+            <span className="appbar-title">YAYVO</span>
           </div>
           <nav className="appbar-nav hide-on-mobile">
             <Link href="/login" className="appbar-link">
@@ -48,10 +48,10 @@ export default async function Page() {
 
         {/* Centered button group */}
         <div className="button-group">
-          <Link href="/registration/consumer" className="btn btn-primary">
+          <Link href="/register/consumer" className="btn btn-primary">
             Start as Consumer
           </Link>
-          <Link href="/registration/retailer" className="btn btn-primary">
+          <Link href="/register/retailer" className="btn btn-primary">
             Start as Retailer
           </Link>
           <Link href="/login" className="btn btn-outline">
