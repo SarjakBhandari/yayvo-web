@@ -1,39 +1,26 @@
 "use client";
-
 import { useState } from "react";
 import Link from "next/link";
-import { Mail, Lock, User, Briefcase, Calendar, MapPin } from "lucide-react";
+import { Mail, Lock, User, Briefcase, Calendar, MapPin, Phone, Image as ImageIcon } from "lucide-react";
 import { useRetailerRegister } from "../_hooks/use-retailer_register";
 
 const countries = [
-  "Nepal",
-  "India",
-  "China",
-  "United States",
-  "United Kingdom",
-  "Australia",
-  "Canada",
-  "Germany",
-  "France",
-  "Japan",
+  "Nepal", "India", "China", "United States", "United Kingdom",
+  "Australia", "Canada", "Germany", "France", "Japan",
 ];
 
 export default function RetailerRegisterForm() {
-
-
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
-    onSubmit,   // renamed for consistency with consumer hook
+    onSubmit,
     errs,
   } = useRetailerRegister((res) => {
-    // success callback
     alert("Registration successful!");
   });
 
-  // show error alert if registration fails
   if (errs) {
     alert(errs);
   }
@@ -58,6 +45,26 @@ export default function RetailerRegisterForm() {
           <input type="text" {...register("organizationName")} />
         </div>
         {errors.organizationName && <p className="form-error">{errors.organizationName.message}</p>}
+      </div>
+
+      {/* Username */}
+      <div className="form-group">
+        <label>Username</label>
+        <div className="input-icon">
+          <User className="icon" />
+          <input type="text" {...register("username")} />
+        </div>
+        {errors.username && <p className="form-error">{errors.username.message}</p>}
+      </div>
+
+      {/* Phone Number */}
+      <div className="form-group">
+        <label>Phone Number</label>
+        <div className="input-icon">
+          <Phone className="icon" />
+          <input type="text" {...register("phoneNumber")} />
+        </div>
+        {errors.phoneNumber && <p className="form-error">{errors.phoneNumber.message}</p>}
       </div>
 
       {/* Email */}
@@ -92,13 +99,21 @@ export default function RetailerRegisterForm() {
           <select {...register("country")}>
             <option value="">Select Country</option>
             {countries.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
+              <option key={c} value={c}>{c}</option>
             ))}
           </select>
         </div>
         {errors.country && <p className="form-error">{errors.country.message}</p>}
+      </div>
+
+      {/* Profile Picture */}
+      <div className="form-group">
+        <label>Profile Picture URL</label>
+        <div className="input-icon">
+          <ImageIcon className="icon" />
+          <input type="text" {...register("profilePicture")} />
+        </div>
+        {errors.profilePicture && <p className="form-error">{errors.profilePicture.message}</p>}
       </div>
 
       {/* Password */}
@@ -106,11 +121,7 @@ export default function RetailerRegisterForm() {
         <label>Password</label>
         <div className="input-icon">
           <Lock className="icon" />
-          <input
-            type="password"
-            {...register("password")}
-          />
-         
+          <input type="password" {...register("password")} />
         </div>
         {errors.password && <p className="form-error">{errors.password.message}</p>}
       </div>
@@ -120,15 +131,9 @@ export default function RetailerRegisterForm() {
         <label>Confirm Password</label>
         <div className="input-icon">
           <Lock className="icon" />
-          <input
-            type= "password"
-            {...register("confirmPassword")}
-          />
-        
+          <input type="password" {...register("confirmPassword")} />
         </div>
-        {errors.confirmPassword && (
-          <p className="form-error">{errors.confirmPassword.message}</p>
-        )}
+        {errors.confirmPassword && <p className="form-error">{errors.confirmPassword.message}</p>}
       </div>
 
       <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>

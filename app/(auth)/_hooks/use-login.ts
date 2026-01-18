@@ -24,28 +24,25 @@ export const useLoginForm = () => {
 
   const handleSubmit = async () => {
     setError("");
-
-    if (!email || !password) {
-      alert("Please enter both email and password");
-      return false;
-    }
-
     try {
       const res: AuthResponse = await handleLogin({ email, password });
 
       if (!res.success) {
         throw new Error(res.message || "Login Failed");
       }
-
-      if (res.token) {
-        localStorage.setItem("authToken", res.token);
-      }
-
       alert("Login Successful!");
 
-      // redirect based on role
-      const role = res.user?.role || "consumer";
-      router.push(`/welcome/${role}`);
+      if (res.user.role === "consumer") {
+        router.push("/consumer/");
+      } else if (res.user.role === "retailer") {
+        router.push("/retailer/");
+      } else if(res.user.role=="admin"){
+        router.push("/admin/");
+      }else{
+        alert("User Not Verified! Please contact Support");
+
+         router.push("/login");
+      }
 
       return true;
     } catch (err: unknown) {
