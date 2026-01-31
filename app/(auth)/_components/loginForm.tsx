@@ -8,7 +8,7 @@ export default function LoginForm() {
   const {
     email,
     password,
-    error,
+    errors, // { email: "...", password: "...", general: "..." }
     handleEmail,
     handlePassword,
     handleSubmit,
@@ -17,13 +17,7 @@ export default function LoginForm() {
   return (
     <div className="auth-card">
       <div className="auth-left">
-        <Image
-          src="/images/logo.png"
-          alt="Yayvo Logo"
-          width={100}
-          height={100}
-          priority
-        />
+        <Image src="/images/logo.png" alt="Yayvo Logo" width={100} height={100} priority />
         <h1 className="auth-title">Welcome!</h1>
       </div>
 
@@ -44,8 +38,11 @@ export default function LoginForm() {
                 value={email}
                 onChange={handleEmail}
                 placeholder="Enter your email"
+                className={errors.email ? "input-error" : ""}
+                required
               />
             </div>
+            {errors.email && <p className="form-error">{errors.email}</p>}
           </div>
 
           <div className="form-group">
@@ -54,14 +51,18 @@ export default function LoginForm() {
               <Lock className="icon" />
               <input
                 type="password"
+                required
                 value={password}
                 onChange={handlePassword}
                 placeholder="Enter your password"
+                className={errors.password ? "input-error" : ""}
               />
             </div>
+            {errors.password && <p className="form-error">{errors.password}</p>}
           </div>
 
-          {error && <p className="form-error">{error}</p>}
+          {/* General error (not field-specific) */}
+          {errors.general && <p className="form-error">{errors.general}</p>}
 
           <div className="form-links text-right">
             <Link href="/auth/forgot">Forgot Password?</Link>
@@ -73,8 +74,7 @@ export default function LoginForm() {
 
           <div className="auth-footer-links" style={{ marginTop: "15px" }}>
             <p>
-              Don&apos;t have an account?{" "}
-              <Link href="/">Create Account</Link>
+              Don&apos;t have an account? <Link href="/">Create Account</Link>
             </p>
           </div>
         </form>

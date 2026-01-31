@@ -132,7 +132,7 @@ export default function RetailerRegisterForm() {
       </button>
 
       <p className="auth-footer-links" style={{ marginTop: "15px" }}>
-        Already have an account? <Link href="/auth/login">Login</Link>
+        Already have an account? <Link href="/login">Login</Link>
       </p>
     </form>
   );
