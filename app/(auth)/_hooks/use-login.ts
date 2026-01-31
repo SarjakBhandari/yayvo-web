@@ -3,16 +3,23 @@ import { ChangeEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { handleLogin } from "@/lib/actions/auth-actions";
 import { AuthResponse } from "@/app/types/auth";
+// import {useAuth} from "@/context/AuthContext";
+
 
 /**
  * Custom hook to manage login form state.
  * Tracks email and password, validates, and calls backend login.
  */
 export const useLoginForm = () => {
+
+  // const {checkAuth}= useAuth();
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+
+  // await checkAuth():
 
   const handleEmail = (e: ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);

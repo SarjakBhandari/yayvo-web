@@ -6,6 +6,7 @@ import { handleRegisterConsumer } from "@/lib/actions/auth-actions";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { AuthResponse } from "@/app/types/auth";
+// import {useAuth} from "@/context/AuthContext";
 
 
 export function useConsumerRegister(onSuccess?: (res: AuthResponse) => void) {
