@@ -138,7 +138,7 @@ export default function ConsumerRegisterForm() {
       </button>
 
       <p className="auth-footer-links" style={{ marginTop: "12px" }}>
-        Already registered? <Link href="/auth/login">Login</Link>
+        Already registered? <Link href="/login">Login</Link>
       </p>
     </form>
   );
