@@ -2,6 +2,9 @@
 import { AuthResponse } from "@/app/types/auth";
 import { login, registerConsumer, registerRetailer } from "../api/auth";
 import { setAuthToken, setUserData, clearAuthCookies } from "../cookie";
+import axios from "axios";
+import { API } from "../api/endpoints";
+// import {useAuth} from "@/context/AuthContext";
 
 export const handleRegisterConsumer = async (
   formData: any
@@ -17,10 +20,6 @@ export const handleRegisterConsumer = async (
         user: { id: "", email: "", role: "" },
       };
     }
-
-    // Optionally set cookies here if you want auto-login after registration
-    // await setAuthToken(res.token);
-    // await setUserData(res.user);
 
     return {
       success: true,
@@ -52,11 +51,6 @@ export const handleRegisterRetailer = async (
         user: { id: "", email: "", role: "" },
       };
     }
-
-    // Optionally set cookies here if you want auto-login after registration
-    // await setAuthToken(res.token);
-    // await setUserData(res.user);
-
     return {
       success: true,
       token: res.token,
@@ -127,3 +121,16 @@ export const handleLogout = async (): Promise<AuthResponse> => {
     };
   }
 };
+
+export const updateProfile = async (formData: FormData) => {
+    try {
+        const response = await axios.put(API.AUTH.updateProfile, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+        return response.data
+    } catch (error: Error | any) {
+        throw new Error(error.response?.data?.message || error.message || 'Update profile failed')
+    }
+}
