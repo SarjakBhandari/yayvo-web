@@ -9,6 +9,6 @@ import { handleLogout } from "@/lib/actions/auth-actions";
 
 export default function Page() {
   return (
-   <div></div>
+   <div><Sidebar/></div>
   );
 }

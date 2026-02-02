@@ -104,7 +104,7 @@ export default function Sidebar() {
           }}
           aria-label="Logout"
         >
-          <LogOut size={16} />
+          <LogOut size={16} onClick={onLogout}/>
           Logout
         </button>
       </div>
