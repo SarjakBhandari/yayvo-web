@@ -1,4 +1,5 @@
 // app/layout.tsx
+import { ToastContainer } from "react-toastify";
 import "./globals.css";
 
 export const metadata = {
