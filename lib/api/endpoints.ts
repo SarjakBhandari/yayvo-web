@@ -29,5 +29,18 @@ export const API = {
     RETAILER_DELETE: "/api/admin/retailers/:id",
     RETAILER_PICTURE: "/api/admin/retailers/auth/:id/profile-picture",
   },
+  Consumer: {
+    // Consumers
+    CONSUMER_BY_ID: "/api/consumers/:id",
+    CONSUMER_BY_AUTH: "/api/consumers/auth/:authId",
+        CONSUMER_UPDATE: "/api/consumers/:id",
+    CONSUMER_PICTURE: "/api/consumers/:id/profile-picture",
+
+
+  },
+
+
+
+
 };
 
