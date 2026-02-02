@@ -6,9 +6,9 @@ export const API = {
     LOGIN: "/api/auth/login",
     LOGOUT: "/api/auth/logout",
     CURRENT_USER: "/api/auth/current-user",
-    updateProfile: "/api/consumers/:id"
+    updateProfile: "/api/consumers/:id",
   },
- ADMIN: {
+  ADMIN: {
     // Consumers
     CONSUMERS_LIST: "/api/admin/consumers",
     CONSUMER_BY_ID: "/api/admin/consumers/:id",
@@ -33,14 +33,14 @@ export const API = {
     // Consumers
     CONSUMER_BY_ID: "/api/consumers/:id",
     CONSUMER_BY_AUTH: "/api/consumers/auth/:authId",
-        CONSUMER_UPDATE: "/api/consumers/:id",
+    CONSUMER_UPDATE: "/api/consumers/:id",
     CONSUMER_PICTURE: "/api/consumers/:id/profile-picture",
-
-
   },
 
-
-
-
+  Retailer: {
+    RETAILER_BY_ID: "/api/retailers/:id",
+    RETAILER_BY_AUTH: "/api/retailers/auth/:authId",
+    RETAILER_UPDATE: "/api/retailers/:id",
+    RETAILER_LOGO: "/api/retailers/auth/:id/profile-picture",
+  },
 };
-
