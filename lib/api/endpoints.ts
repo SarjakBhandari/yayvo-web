@@ -11,6 +11,7 @@ export const API = {
   ADMIN: {
     // Consumers
     CONSUMERS_LIST: "/api/admin/consumers",
+    CONSUMERS_LIST_PAGINATED: "/api/admin/paginated_consumers",
     CONSUMER_BY_ID: "/api/admin/consumers/:id",
     CONSUMER_BY_USERNAME: "/api/admin/consumers/username/:username",
     CONSUMER_BY_AUTH: "/api/admin/consumers/auth/:authId",

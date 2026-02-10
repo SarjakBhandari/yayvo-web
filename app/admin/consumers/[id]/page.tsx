@@ -20,8 +20,6 @@ export default function ConsumerDetail() {
   if (!user) return <p style={{ padding: 24 }}>Not found</p>;
 
   async function handleDelete() {
-    const ok = await confirmAction("Delete this consumer?");
-    if (!ok) return;
     await deleteConsumer(user.authId);
     router.push("/admin");
   }
