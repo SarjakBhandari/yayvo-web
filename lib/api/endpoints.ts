@@ -7,6 +7,8 @@ export const API = {
     LOGOUT: "/api/auth/logout",
     CURRENT_USER: "/api/auth/current-user",
     updateProfile: "/api/consumers/:id",
+    REQUEST_PASSWORD_RESET: "/api/auth/request-password-reset",
+     RESET_PASSWORD: "/api/auth/reset-password/:token",
   },
   ADMIN: {
     // Consumers
