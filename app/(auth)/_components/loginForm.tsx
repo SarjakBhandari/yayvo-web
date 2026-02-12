@@ -65,7 +65,7 @@ export default function LoginForm() {
           {errors.general && <p className="form-error">{errors.general}</p>}
 
           <div className="form-links text-right">
-            <Link href="/auth/forgot">Forgot Password?</Link>
+            <Link href="/forgot-password">Forgot Password?</Link>
           </div>
 
           <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>

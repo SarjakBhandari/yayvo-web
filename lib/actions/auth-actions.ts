@@ -1,13 +1,13 @@
 "use server";
 import { AuthResponse } from "@/app/types/auth";
-import { login, registerConsumer, registerRetailer } from "../api/auth";
+import { login, registerConsumer, registerRetailer, requestPasswordReset, resetPassword } from "../api/auth";
 import { setAuthToken, setUserData, clearAuthCookies } from "../cookie";
 import axios from "axios";
 import { API } from "../api/endpoints";
 // import {useAuth} from "@/context/AuthContext";
 
 export const handleRegisterConsumer = async (
-  formData: any
+  formData: any,
 ): Promise<AuthResponse> => {
   try {
     const res = await registerConsumer(formData);
@@ -38,7 +38,7 @@ export const handleRegisterConsumer = async (
 };
 
 export const handleRegisterRetailer = async (
-  formData: any
+  formData: any,
 ): Promise<AuthResponse> => {
   try {
     const res = await registerRetailer(formData);
@@ -123,14 +123,39 @@ export const handleLogout = async (): Promise<AuthResponse> => {
 };
 
 export const updateProfile = async (formData: FormData) => {
-    try {
-        const response = await axios.put(API.AUTH.updateProfile, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        })
-        return response.data
-    } catch (error: Error | any) {
-        throw new Error(error.response?.data?.message || error.message || 'Update profile failed')
-    }
-}
+  try {
+    const response = await axios.put(API.AUTH.updateProfile, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error: Error | any) {
+    throw new Error(
+      error.response?.data?.message || error.message || "Update profile failed",
+    );
+  }
+};
+
+export const handleRequestPasswordReset = async (email: string) => {
+  try {
+    const res = await requestPasswordReset(email);
+    return { success: true, message: res.message || "Reset link sent" };
+  } catch (err: any) {
+    return { success: false, message: err.message };
+  }
+};
+export const handleResetPassword = async (
+  token: string,
+  newPassword: string,
+) => {
+  try {
+    const res = await resetPassword(token, newPassword);
+    return {
+      success: true,
+      message: res.message || "Password reset successful",
+    };
+  } catch (err: any) {
+    return { success: false, message: err.message };
+  }
+};
