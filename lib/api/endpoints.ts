@@ -44,4 +44,16 @@ export const API = {
     RETAILER_UPDATE: "/api/retailers/:id",
     RETAILER_LOGO: "/api/retailers/auth/:id/profile-picture",
   },
+
+  PRODUCTS: {
+    CREATE: "/api/products",
+        IS_LIKED: "/api/products/isLiked",
+    IMAGE: "/api/products/:id/image",
+    PAGINATED: "/api/products",
+    BY_ID: "/api/products/:id",
+    BY_AUTHOR: "/api/products/author/:authorId",
+    LIKE: "/api/products/:id/like",
+    UNLIKE: "/api/products/:id/unlike",
+    DELETE:"/api/products/:id"
+  },
 };

@@ -151,25 +151,7 @@ console.log("profilePicture:"+normalized?.profilePicture);
               </svg>
               Edit Profile
             </button>
-          </div>
-
-          <div className="profile-stats">
-            <div className="stat-item">
-              <span className="stat-value">0</span>
-              <span className="stat-label">products</span>
-            </div>
-
-            <div className="stat-item">
-              <span className="stat-value">0</span>
-              <span className="stat-label">orders</span>
-            </div>
-
-            <div className="stat-item">
-              <span className="stat-value">0</span>
-              <span className="stat-label">customers</span>
-            </div>
-          </div>
-
+          </div>          
           <div className="profile-details">
             <h2 className="full-name">Owner: {normalized.ownerName}</h2>
 
