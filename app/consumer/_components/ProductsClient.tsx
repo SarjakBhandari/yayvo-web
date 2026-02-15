@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import type { Product } from "../../retailer/_schemas/product.schema";
 import { getProductsClient } from "../../../lib/actions/product-actions"; // use client wrapper
-import ProductCard from "./productcard";
+import ProductCard from "./consumerProduct";
 
 type Props = {
   initialProducts?: Product[];
