@@ -18,7 +18,7 @@ import { ProductListResponse, Product } from "../../app/retailer/_schemas/produc
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5050";
 
 /* ---------------------------
-   Client-side re-exports (use in client hooks/components)
+   Client-side re-exports
    --------------------------- */
 export async function createProductClient(payload: CreateProductPayload): Promise<Product> {
   return await apiCreateProduct(payload);
@@ -33,24 +33,22 @@ export async function getProductsByAuthorClient(authorId: string): Promise<Produ
   return await apiGetProductsByAuthor(authorId);
 }
 export async function likeClient(productId: string, userId: string) {
+  // backend expects { productId, userId }
   return await apiLikeProduct(productId, userId);
 }
-
 export async function unlikeClient(productId: string, userId: string) {
   return await apiUnlikeProduct(productId, userId);
 }
-
 export async function isLikedClient(productId: string, userId: string) {
   return await apiIsProductLiked(productId, userId);
 }
+
 /* ---------------------------
-   Server-side helpers (use in server components/actions)
-   attach Authorization header from cookie
+   Server-side helpers (with cookie auth)
    --------------------------- */
 async function fetchWithAuth(path: string, opts: RequestInit = {}) {
   const token = await getAuthToken();
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
     ...(opts.headers as Record<string, string> || {}),
   };
   if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -81,6 +79,7 @@ export async function loadMarketProducts(search?: string): Promise<ProductListRe
 export async function serverCreateProduct(payload: CreateProductPayload): Promise<Product> {
   return (await fetchWithAuth(API.PRODUCTS.CREATE, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   })) as Product;
 }
@@ -110,28 +109,33 @@ export async function loadProductById(id: string): Promise<Product> {
   return (await fetchWithAuth(API.PRODUCTS.BY_ID.replace(":id", encodeURIComponent(id)))) as Product;
 }
 
-export async function serverLikeProduct(productId: string) {
-  return await fetchWithAuth(API.PRODUCTS.LIKE.replace(":id", encodeURIComponent(productId)), { method: "POST" });
-}
-
-export async function serverUnlikeProduct(productId: string) {
-  return await fetchWithAuth(API.PRODUCTS.UNLIKE.replace(":id", encodeURIComponent(productId)), { method: "POST" });
-}
-
-export async function serverIsProductLiked(productId: string) {
-  return (await fetchWithAuth(API.PRODUCTS.IS_LIKED.replace(":id", encodeURIComponent(productId)))) as { liked: boolean };
-}
-export async function deleteProductClient(productId: string) {
-  const res = await fetchWithAuth(API.PRODUCTS.DELETE.replace(":id", encodeURIComponent(productId)), {
-    method: "DELETE",
+export async function serverLikeProduct(productId: string, userId: string) {
+  return await fetchWithAuth(API.PRODUCTS.LIKE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ productId, userId }),
   });
-  return res as { success: boolean };
 }
 
-/* ---------------------------
-   Server-side helpers (use in server components/actions)
-   attach Authorization header from cookie
-   --------------------------- */
+export async function serverUnlikeProduct(productId: string, userId: string) {
+  return await fetchWithAuth(API.PRODUCTS.UNLIKE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ productId, userId }),
+  });
+}
+
+export async function serverIsProductLiked(productId: string, userId: string) {
+  const q = `?productId=${encodeURIComponent(productId)}&userId=${encodeURIComponent(userId)}`;
+  return (await fetchWithAuth(`${API.PRODUCTS.IS_LIKED}${q}`)) as { liked: boolean };
+}
+
+export async function deleteProductClient(productId: string) {
+  return await fetchWithAuth(API.PRODUCTS.DELETE.replace(":id", encodeURIComponent(productId)), {
+    method: "DELETE",
+  }) as { success: boolean };
+}
+
 export async function serverDeleteProduct(productId: string) {
   return await fetchWithAuth(API.PRODUCTS.DELETE.replace(":id", encodeURIComponent(productId)), {
     method: "DELETE",
@@ -143,10 +147,8 @@ export async function updateProductClient(productId: string, data: {
   description?: string;
   targetSentiment?: string[];
 }) {
-  return updateProduct(productId,data);
+  return updateProduct(productId, data);
 }
-
-
 
 export async function updateProductImageClient(productId: string, file: File) {
   return await serverUploadProductImage(productId, file);
