@@ -54,8 +54,8 @@ export const API = {
     PAGINATED: "/api/products",
     BY_ID: "/api/products/:id",
     BY_AUTHOR: "/api/products/author/:authorId",
-    LIKE: "/api/products/:id/like",
-    UNLIKE: "/api/products/:id/unlike",
+    LIKE: "/api/products/like",
+    UNLIKE: "/api/products/unlike",
     DELETE:"/api/products/:id"
   },
 
