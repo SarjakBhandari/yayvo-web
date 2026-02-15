@@ -49,7 +49,7 @@ export const API = {
 
   PRODUCTS: {
     CREATE: "/api/products",
-        IS_LIKED: "/api/products/isLiked",
+    IS_LIKED: "/api/products/isLiked",
     IMAGE: "/api/products/:id/image",
     PAGINATED: "/api/products",
     BY_ID: "/api/products/:id",
@@ -58,4 +58,18 @@ export const API = {
     UNLIKE: "/api/products/:id/unlike",
     DELETE:"/api/products/:id"
   },
+
+  REVIEWS:{
+    CREATE: "/api/reviews/",
+    BY_ID: "/api/reviews/:id",
+    IMAGE: "/api/reviews/:id/image",
+    PAGINATED: "/api/reviews/paginated",
+    BY_AUTHOR: "/api/reviews/author/:authorId",
+    IS_LIKED: "/api/reviews/:id/islikedby/:userid",
+    LIKE: "/api/reviews/:id/like",
+    UNLIKE: "/api/reviews/:id/unlike",
+    DELETE:"/api/reviews/:id"
+  }
+
+
 };
