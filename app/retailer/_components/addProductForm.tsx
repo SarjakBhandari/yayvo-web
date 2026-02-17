@@ -1,9 +1,13 @@
-// src/app/retailer/create/_components/AddProductForm.tsx
+// src/app/retailer/_components/addProductForm.tsx
 "use client";
 import React, { useEffect, useMemo } from "react";
 import { useCreateProduct } from "../_hooks/useCreateProducts";
+import { Loader2, Upload } from "lucide-react";
 
 const SENTIMENTS = ["calm", "cozy", "joy", "minimalist", "nostalgic", "excited"];
+const SENTIMENT_ICONS: Record<string, string> = {
+  calm: "🌊", cozy: "🕯️", joy: "✨", minimalist: "◻️", nostalgic: "📷", excited: "🚀",
+};
 
 export default function AddProductForm({
   onCreated,
@@ -15,100 +19,215 @@ export default function AddProductForm({
   initialRetailerName?: string | null;
 }) {
   const {
-    title,
-    description,
-    retailerAuthId,
-    retailerName,
-    targetSentiment,
-    file,
-    errors,
-    isSubmitting,
-    handleTitle,
-    handleDescription,
-    handleFile,
-    toggleSentiment,
-    handleSubmit,
-    setRetailerAuthId,
-    setRetailerName,
-  } = useCreateProduct((created) => {
-    if (onCreated) onCreated();
-  });
+    title, description, targetSentiment, file, errors, isSubmitting,
+    handleTitle, handleDescription, handleFile, toggleSentiment, handleSubmit,
+    setRetailerAuthId, setRetailerName,
+  } = useCreateProduct(() => { onCreated?.(); });
 
   useEffect(() => {
     if (initialRetailerAuthId) setRetailerAuthId(initialRetailerAuthId);
-    if (initialRetailerName) setRetailerName(initialRetailerName);
+    if (initialRetailerName)   setRetailerName(initialRetailerName);
   }, [initialRetailerAuthId, initialRetailerName, setRetailerAuthId, setRetailerName]);
 
   const selectedSet = useMemo(() => new Set(targetSentiment), [targetSentiment]);
 
+  const previewUrl = file ? URL.createObjectURL(file) : null;
+
   return (
     <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+        .apf-form {
+          font-family: 'DM Sans', sans-serif;
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+          max-width: 680px;
+        }
+        .apf-field { display: flex; flex-direction: column; gap: 6px; }
+        .apf-label {
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: #9C8E7A;
+          font-weight: 500;
+        }
+        .apf-input, .apf-textarea {
+          font-family: 'DM Sans', sans-serif;
+          font-size: 14px;
+          padding: 12px 14px;
+          border-radius: 12px;
+          border: 1px solid #E8E4DC;
+          background: #FAFAF8;
+          color: #1A1612;
+          outline: none;
+          width: 100%;
+          box-sizing: border-box;
+          transition: border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+        .apf-input::placeholder, .apf-textarea::placeholder { color: #B8A898; }
+        .apf-input:focus, .apf-textarea:focus {
+          border-color: #C9A96E;
+          box-shadow: 0 0 0 3px rgba(201,169,110,0.12);
+        }
+        .apf-textarea { min-height: 110px; resize: none; line-height: 1.6; }
+        .apf-err { font-size: 12px; color: #C0392B; }
+        .apf-err-box {
+          background: #FFF8F5;
+          border: 1px solid #FFDDD0;
+          border-radius: 10px;
+          padding: 12px 14px;
+          font-size: 13px;
+          color: #C0392B;
+        }
+
+        /* Drop zone */
+        .apf-dropzone {
+          border: 2px dashed #D4C8B4;
+          border-radius: 14px;
+          background: #FAFAF8;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          padding: 30px 20px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          text-align: center;
+          position: relative;
+        }
+        .apf-dropzone:hover { border-color: #C9A96E; background: #FAF6EE; }
+        .apf-dropzone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+        .apf-dropzone-icon {
+          width: 44px; height: 44px; border-radius: 12px;
+          background: #F0EBE1; display: flex; align-items: center; justify-content: center;
+          color: #C9A96E;
+        }
+        .apf-dropzone-label { font-size: 14px; font-weight: 500; color: #5A4C38; }
+        .apf-dropzone-sub { font-size: 12px; color: #B8A898; }
+
+        /* Preview */
+        .apf-preview {
+          width: 100%;
+          max-height: 220px;
+          border-radius: 14px;
+          overflow: hidden;
+          background: #1A1612;
+        }
+        .apf-preview img { width: 100%; height: 220px; object-fit: cover; display: block; }
+
+        /* Sentiments */
+        .apf-sentiment-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 10px;
+        }
+        .apf-sentiment-btn {
+          display: flex; flex-direction: column; align-items: center; gap: 6px;
+          padding: 14px 10px;
+          border-radius: 14px;
+          border: 1px solid #E8E4DC;
+          background: #FAFAF8;
+          cursor: pointer;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 12px;
+          font-weight: 500;
+          color: #5A4C38;
+          transition: all 0.18s ease;
+        }
+        .apf-sentiment-btn:hover { background: #F0EBE1; border-color: #D4C8B4; }
+        .apf-sentiment-btn.selected { background: #1A1612; border-color: #1A1612; color: #FAFAF8; }
+        .apf-sentiment-emoji { font-size: 22px; line-height: 1; }
+        .apf-sentiment-label { text-transform: capitalize; }
+
+        /* Submit */
+        .apf-actions { display: flex; gap: 10px; }
+        .apf-submit-btn {
+          display: inline-flex; align-items: center; gap: 8px;
+          padding: 13px 24px;
+          border-radius: 12px;
+          border: none;
+          background: #1A1612;
+          color: #FAFAF8;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          letter-spacing: 0.01em;
+        }
+        .apf-submit-btn:hover:not(:disabled) {
+          background: #2A2420;
+          transform: translateY(-1px);
+          box-shadow: 0 8px 20px rgba(26,22,18,0.2);
+        }
+        .apf-submit-btn:disabled { opacity: 0.6; cursor: wait; }
+        .apf-spin { animation: apfSpin 0.8s linear infinite; }
+        @keyframes apfSpin { to { transform: rotate(360deg) } }
+      `}</style>
+
       <form
-        className="form"
-        onSubmit={async (e) => {
-          e.preventDefault();
-          await handleSubmit();
-        }}
+        className="apf-form"
+        onSubmit={async (e) => { e.preventDefault(); await handleSubmit(); }}
       >
-        <div className="field">
-          <label>Title</label>
-          <input value={title} onChange={handleTitle} />
-          {errors.title && <small className="err">{errors.title}</small>}
+        <div className="apf-field">
+          <label className="apf-label">Title *</label>
+          <input className="apf-input" value={title} onChange={handleTitle} placeholder="Give your product a title…" />
+          {errors.title && <span className="apf-err">{errors.title}</span>}
         </div>
 
-        <div className="field">
-          <label>Description</label>
-          <textarea value={description} onChange={handleDescription} />
+        <div className="apf-field">
+          <label className="apf-label">Description</label>
+          <textarea className="apf-textarea" value={description} onChange={handleDescription} placeholder="Describe what makes this product special…" />
         </div>
 
-        <div className="field">
-          <label>Product Image</label>
-          <input type="file" accept="image/*" onChange={handleFile} />
+        <div className="apf-field">
+          <label className="apf-label">Product Image</label>
+          {previewUrl ? (
+            <div className="apf-preview">
+              <img src={previewUrl} alt="Preview" />
+            </div>
+          ) : (
+            <div className="apf-dropzone">
+              <input type="file" accept="image/*" onChange={handleFile} />
+              <div className="apf-dropzone-icon"><Upload size={20} /></div>
+              <div className="apf-dropzone-label">Drop an image or click to browse</div>
+              <div className="apf-dropzone-sub">PNG, JPG, WEBP up to 10 MB</div>
+            </div>
+          )}
         </div>
 
-        <div className="field">
-          <label>Select Target Sentiments</label>
-          <div className="grid">
+        <div className="apf-field">
+          <label className="apf-label">Target Sentiments</label>
+          <div className="apf-sentiment-grid">
             {SENTIMENTS.map((s) => {
-              const isSelected = selectedSet.has(s);
+              const selected = selectedSet.has(s);
               return (
                 <button
                   key={s}
                   type="button"
-                  className={`sentiment ${isSelected ? "selected" : ""}`}
+                  className={`apf-sentiment-btn${selected ? " selected" : ""}`}
                   onClick={() => toggleSentiment(s)}
                 >
-                  <div className="emoji">{s[0].toUpperCase()}</div>
-                  <div className="label">{s}</div>
+                  <span className="apf-sentiment-emoji">{SENTIMENT_ICONS[s]}</span>
+                  <span className="apf-sentiment-label">{s}</span>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {errors.general && <div className="errBox">{errors.general}</div>}
+        {errors.general && <div className="apf-err-box">{errors.general}</div>}
 
-        <button type="submit" disabled={isSubmitting} className="submit">
-          {isSubmitting ? "Creating…" : "Create Product"}
-        </button>
+        <div className="apf-actions">
+          <button type="submit" disabled={isSubmitting} className="apf-submit-btn">
+            {isSubmitting ? <Loader2 size={15} className="apf-spin" /> : null}
+            {isSubmitting ? "Creating…" : "Create Product"}
+          </button>
+        </div>
       </form>
-
-      <style jsx>{`
-        .form { display:flex; flex-direction:column; gap:12px; max-width:720px; background:#fff; padding:16px; border-radius:8px; box-shadow:0 6px 18px rgba(16,24,40,0.04); }
-        .field { display:flex; flex-direction:column; gap:6px; }
-        label { font-weight:700; color:#111827; }
-        input, textarea { padding:8px 10px; border-radius:6px; border:1px solid #e6e6e6; font-size:14px; }
-        textarea { min-height:100px; resize:vertical; }
-        .err { color:#c00; font-size:12px; }
-        .errBox { color:#c00; padding:8px; background:#fff0f0; border-radius:6px; }
-        .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:12px; margin-top:8px; }
-        .sentiment { display:flex; flex-direction:column; align-items:center; gap:8px; padding:12px; border-radius:12px; border:1px solid #e6e6e6; background:#fff; cursor:pointer; }
-        .sentiment.selected { border-color:#2563eb; background:rgba(37,99,235,0.06); }
-        .emoji { width:40px; height:40px; border-radius:10px; background:#f3f4f6; display:flex; align-items:center; justify-content:center; font-weight:700; }
-        .label { text-transform:capitalize; color:#111827; font-weight:600; }
-        .submit { padding:10px 14px; border-radius:8px; background:#111827; color:#fff; border:none; cursor:pointer; font-weight:700; }
-        .submit:disabled { opacity:0.6; cursor:not-allowed; }
-      `}</style>
     </>
   );
 }
