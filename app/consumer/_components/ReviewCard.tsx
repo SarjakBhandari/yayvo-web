@@ -2,15 +2,21 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
 import { Heart, Save, X } from "lucide-react";
-import { likeReviewClient, unlikeReviewClient, isReviewLikedClient } from "@/lib/actions/review-actions";
+import {
+  likeReviewClient,
+  unlikeReviewClient,
+  isReviewLikedClient,
+} from "@/lib/actions/review-actions";
 import { getConsumerByAuthId, getConsumerById } from "@/lib/api/consumer";
+import { unsaveReview, saveReview } from "@/lib/api/collection";
 
 type Props = {
   review: any;
   currentUserId: string | null;
 };
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5050";
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5050";
 
 export default function ReviewCard({ review, currentUserId }: Props) {
   const reviewId = review?._id ?? review?.id ?? null;
@@ -57,7 +63,8 @@ export default function ReviewCard({ review, currentUserId }: Props) {
       if (!currentUserId || !reviewId) return;
       try {
         const resp = await isReviewLikedClient(reviewId, currentUserId);
-        const likedVal = resp === true || resp?.liked === true || resp?.data?.liked === true;
+        const likedVal =
+          resp === true || resp?.liked === true || resp?.data?.liked === true;
         if (mounted) setLiked(Boolean(likedVal));
       } catch (err) {
         console.warn("isReviewLiked failed", err);
@@ -77,7 +84,8 @@ export default function ReviewCard({ review, currentUserId }: Props) {
       setAuthor(null);
 
       // candidate may be authId or consumer _id depending on how review was created
-      const candidate = review?.authorId ?? review?.authorAuthId ?? review?.author?._id ?? null;
+      const candidate =
+        review?.authorId ?? review?.authorAuthId ?? review?.author?._id ?? null;
       if (!candidate) {
         setAuthorError("No author id provided");
         setAuthorLoading(false);
@@ -152,12 +160,22 @@ export default function ReviewCard({ review, currentUserId }: Props) {
       if (!prevLiked) {
         const resp = await likeReviewClient(reviewId, currentUserId);
         const updated = resp?.data ?? resp;
-        setLikesCount(updated?.likes ?? (Array.isArray(updated?.likedBy) ? updated.likedBy.length : likesCount));
+        setLikesCount(
+          updated?.likes ??
+            (Array.isArray(updated?.likedBy)
+              ? updated.likedBy.length
+              : likesCount),
+        );
         setLiked(true);
       } else {
         const resp = await unlikeReviewClient(reviewId, currentUserId);
         const updated = resp?.data ?? resp;
-        setLikesCount(updated?.likes ?? (Array.isArray(updated?.likedBy) ? updated.likedBy.length : Math.max(0, likesCount - 1)));
+        setLikesCount(
+          updated?.likes ??
+            (Array.isArray(updated?.likedBy)
+              ? updated.likedBy.length
+              : Math.max(0, likesCount - 1)),
+        );
         setLiked(false);
       }
     } catch (err) {
@@ -169,14 +187,19 @@ export default function ReviewCard({ review, currentUserId }: Props) {
     }
   }
 
-  async function handleToggleSave() {
-    setSaving(true);
+  async function toggleSave(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!currentUserId) return;
     try {
-      setSaved((s) => !s);
+      if (saved) {
+        setSaved(false);
+        await unsaveReview(review._id);
+      } else {
+        setSaved(true);
+        await saveReview(review._id);
+      }
     } catch (err) {
-      console.error("save failed", err);
-    } finally {
-      setSaving(false);
+      console.error("Review save toggle failed", err);
     }
   }
 
@@ -188,8 +211,11 @@ export default function ReviewCard({ review, currentUserId }: Props) {
   }
 
   // Helper to render author display values with fallbacks
-  const displayName = author?.fullName ?? author?.username ?? review?.authorName ?? "Unknown";
-  const displayHandle = author?.username ? `@${author.username}` : review?.authorLocation ?? "";
+  const displayName =
+    author?.fullName ?? author?.username ?? review?.authorName ?? "Unknown";
+  const displayHandle = author?.username
+    ? `@${author.username}`
+    : (review?.authorLocation ?? "");
   const displayPhone = author?.phoneNumber ?? "";
 
   return (
@@ -205,89 +231,131 @@ export default function ReviewCard({ review, currentUserId }: Props) {
           boxShadow: "0 6px 18px rgba(16,24,40,0.04)",
         }}
       >
-{/* Header */}
-<div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px" }}>
-  {/* Avatar: image if available, otherwise initials */}
-  <div
-    aria-hidden
-    style={{
-      width: 40,
-      height: 40,
-      borderRadius: "50%",
-      overflow: "hidden",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: 14,
-      color: "#fff",
-      background: "#9ca3af",
-      flexShrink: 0,
-    }}
-  >
-    {(() => {
-      // Resolve avatar URL from author object or review fallback
-      const candidateImg =
-        author?.profileImage ??
-        author?.profilePicture ??
-        author?.avatar ??
-        author?.picture ??
-        author?.image ??
-        author?.photo ??
-        review?.authorPicture ??
-        review?.authorImage ??
-        null;
-
-      if (candidateImg) {
-        // If candidateImg is already an absolute URL, use it; otherwise prefix BASE_URL
-        const url =
-          typeof candidateImg === "string" && (candidateImg.startsWith("http://") || candidateImg.startsWith("https://"))
-            ? candidateImg
-            : `${BASE_URL}${candidateImg.startsWith("/") ? "" : "/"}${candidateImg}`;
-
-        // Render as background image for consistent cropping
-        return (
+        {/* Header */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            padding: "12px 14px",
+          }}
+        >
+          {/* Avatar: image if available, otherwise initials */}
           <div
+            aria-hidden
             style={{
               width: 40,
               height: 40,
               borderRadius: "50%",
-              backgroundImage: `url("${url}")`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
+              overflow: "hidden",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 14,
+              color: "#fff",
+              background: "#9ca3af",
+              flexShrink: 0,
             }}
-          />
-        );
-      }
+          >
+            {(() => {
+              // Resolve avatar URL from author object or review fallback
+              const candidateImg =
+                author?.profileImage ??
+                author?.profilePicture ??
+                author?.avatar ??
+                author?.picture ??
+                author?.image ??
+                author?.photo ??
+                review?.authorPicture ??
+                review?.authorImage ??
+                null;
 
-      // Fallback: initials from author fullName, username, or review authorName
-      const name = (author?.fullName ?? author?.username ?? review?.authorName ?? "U").toString();
-      const initials = name
-        .split(" ")
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((n: string) => n.charAt(0).toUpperCase())
-        .join("");
-      return <div style={{ width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center" }}>{initials}</div>;
-    })()}
-  </div>
+              if (candidateImg) {
+                // If candidateImg is already an absolute URL, use it; otherwise prefix BASE_URL
+                const url =
+                  typeof candidateImg === "string" &&
+                  (candidateImg.startsWith("http://") ||
+                    candidateImg.startsWith("https://"))
+                    ? candidateImg
+                    : `${BASE_URL}${candidateImg.startsWith("/") ? "" : "/"}${candidateImg}`;
 
-  <div style={{ display: "flex", flexDirection: "column" }}>
-    <div style={{ fontWeight: 700, fontSize: 14 }}>
-      {author?.fullName ?? author?.username ?? review?.authorName ?? "Unknown"}
-    </div>
-    <div style={{ fontSize: 12, color: "#6b7280" }}>
-      {author?.username ? `@${author.username}` : review?.authorLocation ?? ""}
-    </div>
-  </div>
+                // Render as background image for consistent cropping
+                return (
+                  <div
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: "50%",
+                      backgroundImage: `url("${url}")`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }}
+                  />
+                );
+              }
 
-  <div style={{ marginLeft: "auto", fontSize: 12, color: "#6b7280" }}>
-    {authorLoading ? "Loading author…" : authorError ? "Author not found" : ""}
-  </div>
-</div>
+              // Fallback: initials from author fullName, username, or review authorName
+              const name = (
+                author?.fullName ??
+                author?.username ??
+                review?.authorName ??
+                "U"
+              ).toString();
+              const initials = name
+                .split(" ")
+                .filter(Boolean)
+                .slice(0, 2)
+                .map((n: string) => n.charAt(0).toUpperCase())
+                .join("");
+              return (
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {initials}
+                </div>
+              );
+            })()}
+          </div>
 
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ fontWeight: 700, fontSize: 14 }}>
+              {author?.fullName ??
+                author?.username ??
+                review?.authorName ??
+                "Unknown"}
+            </div>
+            <div style={{ fontSize: 12, color: "#6b7280" }}>
+              {author?.username
+                ? `@${author.username}`
+                : (review?.authorLocation ?? "")}
+            </div>
+          </div>
+
+          <div style={{ marginLeft: "auto", fontSize: 12, color: "#6b7280" }}>
+            {authorLoading
+              ? "Loading author…"
+              : authorError
+                ? "Author not found"
+                : ""}
+          </div>
+        </div>
 
         {/* Large image (clickable) */}
-        <div style={{ width: "100%", background: "#000", display: "block", position: "relative", cursor: imageSrc ? "pointer" : "default" }}>
+        <div
+          style={{
+            width: "100%",
+            background: "#000",
+            display: "block",
+            position: "relative",
+            cursor: imageSrc ? "pointer" : "default",
+          }}
+        >
           {imageSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -321,7 +389,14 @@ export default function ReviewCard({ review, currentUserId }: Props) {
         </div>
 
         {/* Actions row */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            padding: "10px 14px",
+          }}
+        >
           <button
             onClick={handleToggleLike}
             disabled={loadingLike}
@@ -341,12 +416,16 @@ export default function ReviewCard({ review, currentUserId }: Props) {
             }}
             aria-label={liked ? "Unlike" : "Like"}
           >
-            <Heart size={18} fill={liked ? "#ef4444" : "none"} stroke={liked ? "#ef4444" : undefined} />
+            <Heart
+              size={18}
+              fill={liked ? "#ef4444" : "none"}
+              stroke={liked ? "#ef4444" : undefined}
+            />
             <span style={{ fontSize: 13, opacity: 0.95 }}>{likesCount}</span>
           </button>
 
           <button
-            onClick={handleToggleSave}
+            onClick={toggleSave}
             disabled={saving}
             aria-pressed={saved}
             style={{
@@ -365,15 +444,25 @@ export default function ReviewCard({ review, currentUserId }: Props) {
             }}
             aria-label={saved ? "Unsave" : "Save"}
           >
-            <Save size={18} fill={saved ? "#111827" : "none"} stroke={saved ? "#111827" : undefined} />
-            <span style={{ fontSize: 13, opacity: 0.95 }}>{saved ? "Saved" : "Save"}</span>
+            <Save
+              size={18}
+              fill={saved ? "#111827" : "none"}
+              stroke={saved ? "#111827" : undefined}
+            />
+            <span style={{ fontSize: 13, opacity: 0.95 }}>
+              {saved ? "Saved" : "Save"}
+            </span>
           </button>
         </div>
 
         {/* Caption / description */}
         <div style={{ padding: "0 14px 14px 14px" }}>
-          <div style={{ fontWeight: 700, marginBottom: 6 }}>{review?.title}</div>
-          <div style={{ color: "#374151", marginBottom: 8 }}>{review?.description}</div>
+          <div style={{ fontWeight: 700, marginBottom: 6 }}>
+            {review?.title}
+          </div>
+          <div style={{ color: "#374151", marginBottom: 8 }}>
+            {review?.description}
+          </div>
           {Array.isArray(review?.sentiments) && (
             <div style={{ color: "#6b7280", fontSize: 13 }}>
               {review.sentiments.map((s: string) => (
@@ -415,9 +504,25 @@ export default function ReviewCard({ review, currentUserId }: Props) {
               boxShadow: "0 10px 40px rgba(2,6,23,0.4)",
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: 12, borderBottom: "1px solid #eee" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: 12,
+                borderBottom: "1px solid #eee",
+              }}
+            >
               <div style={{ fontWeight: 700 }}>Review details</div>
-              <button onClick={closeModal} aria-label="Close" style={{ background: "transparent", border: "none", cursor: "pointer" }}>
+              <button
+                onClick={closeModal}
+                aria-label="Close"
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
                 <X />
               </button>
             </div>
@@ -427,25 +532,56 @@ export default function ReviewCard({ review, currentUserId }: Props) {
               <div style={{ flex: "0 0 420px" }}>
                 {imageSrc ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={imageSrc} alt={review?.title} style={{ width: "100%", height: "auto", objectFit: "cover", borderRadius: 8 }} />
+                  <img
+                    src={imageSrc}
+                    alt={review?.title}
+                    style={{
+                      width: "100%",
+                      height: "auto",
+                      objectFit: "cover",
+                      borderRadius: 8,
+                    }}
+                  />
                 ) : (
-                  <div style={{ width: "100%", paddingTop: "75%", background: "#111827", borderRadius: 8 }} />
+                  <div
+                    style={{
+                      width: "100%",
+                      paddingTop: "75%",
+                      background: "#111827",
+                      borderRadius: 8,
+                    }}
+                  />
                 )}
               </div>
 
               {/* Right: review + author */}
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 12 }}>
+              <div
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                }}
+              >
                 <div>
-                  <div style={{ fontWeight: 800, fontSize: 18 }}>{review?.title}</div>
-                  <div style={{ color: "#6b7280", marginTop: 6 }}>{review?.productName}</div>
-                  <div style={{ color: "#9ca3af", marginTop: 6 }}>{new Date(review?.createdAt ?? Date.now()).toLocaleString()}</div>
+                  <div style={{ fontWeight: 800, fontSize: 18 }}>
+                    {review?.title}
+                  </div>
+                  <div style={{ color: "#6b7280", marginTop: 6 }}>
+                    {review?.productName}
+                  </div>
+                  <div style={{ color: "#9ca3af", marginTop: 6 }}>
+                    {new Date(review?.createdAt ?? Date.now()).toLocaleString()}
+                  </div>
                 </div>
 
                 <div style={{ color: "#111827" }}>{review?.description}</div>
 
                 <div style={{ marginTop: 8 }}>
                   <strong>Sentiments:</strong>{" "}
-                  {Array.isArray(review?.sentiments) ? review.sentiments.join(", ") : "—"}
+                  {Array.isArray(review?.sentiments)
+                    ? review.sentiments.join(", ")
+                    : "—"}
                 </div>
 
                 <div style={{ borderTop: "1px solid #eee", paddingTop: 12 }}>
@@ -456,15 +592,39 @@ export default function ReviewCard({ review, currentUserId }: Props) {
                   ) : authorError ? (
                     <div style={{ color: "#b91c1c" }}>{authorError}</div>
                   ) : author ? (
-                    <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                      <div style={{ width: 64, height: 64, borderRadius: 12, overflow: "hidden", background: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>
-                        {author?.fullName ? author.fullName.charAt(0).toUpperCase() : "U"}
+                    <div
+                      style={{ display: "flex", gap: 12, alignItems: "center" }}
+                    >
+                      <div
+                        style={{
+                          width: 64,
+                          height: 64,
+                          borderRadius: 12,
+                          overflow: "hidden",
+                          background: "#f3f4f6",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: 20,
+                        }}
+                      >
+                        {author?.fullName
+                          ? author.fullName.charAt(0).toUpperCase()
+                          : "U"}
                       </div>
                       <div style={{ display: "flex", flexDirection: "column" }}>
-                        <div style={{ fontWeight: 700 }}>{author?.fullName ?? author?.username ?? "Unknown"}</div>
-                        <div style={{ color: "#6b7280" }}>{author?.username ? `@${author.username}` : ""}</div>
-                        <div style={{ color: "#6b7280", marginTop: 6 }}>{author?.phoneNumber ?? ""}</div>
-                        {author?.bio && <div style={{ marginTop: 8 }}>{author.bio}</div>}
+                        <div style={{ fontWeight: 700 }}>
+                          {author?.fullName ?? author?.username ?? "Unknown"}
+                        </div>
+                        <div style={{ color: "#6b7280" }}>
+                          {author?.username ? `@${author.username}` : ""}
+                        </div>
+                        <div style={{ color: "#6b7280", marginTop: 6 }}>
+                          {author?.phoneNumber ?? ""}
+                        </div>
+                        {author?.bio && (
+                          <div style={{ marginTop: 8 }}>{author.bio}</div>
+                        )}
                       </div>
                     </div>
                   ) : (

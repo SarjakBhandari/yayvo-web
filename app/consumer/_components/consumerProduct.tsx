@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import type { Product } from "../../retailer/_schemas/product.schema";
 import { isLikedClient, likeClient, unlikeClient } from "../../../lib/actions/product-actions";
+import { saveProduct, unsaveProduct, fetchSavedProducts } from "@/lib/api/collection";
 import { Heart, Bookmark } from "lucide-react";
 
 type Props = {
@@ -14,23 +15,29 @@ export default function ProductCard({ product, currentUserId }: Props) {
 
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState<number>(product.noOfLikes || 0);
+  const [saved, setSaved] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
 
-  // Fetch initial like status
+  // Fetch initial like + saved status
   useEffect(() => {
     if (!currentUserId) return;
     let mounted = true;
     (async () => {
       try {
+        // Like status
         const res = await isLikedClient(product._id, currentUserId);
         if (mounted) setLiked(Boolean(res?.liked));
+
+        // Saved status
+        const savedResp = await fetchSavedProducts(1, 100);
+        const savedItems = savedResp?.items ?? savedResp?.data ?? [];
+        const isSaved = savedItems.some((p: any) => String(p._id ?? p.productId) === String(product._id));
+        if (mounted) setSaved(isSaved);
       } catch (err) {
-        console.error("Failed to get like status", err);
+        console.error("Failed to get status", err);
       }
     })();
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [product._id, currentUserId]);
 
   // Toggle like/unlike
@@ -49,8 +56,23 @@ export default function ProductCard({ product, currentUserId }: Props) {
       }
     } catch (err) {
       console.error("Like toggle failed", err);
-      setLiked((prev) => !prev);
-      setLikesCount((c) => (liked ? c + 1 : Math.max(0, c - 1)));
+    }
+  }
+
+  // Toggle save/unsave
+  async function toggleSave(e: React.MouseEvent) {
+    e.stopPropagation(); // prevent triggering popup
+    if (!currentUserId) return;
+    try {
+      if (saved) {
+        setSaved(false);
+        await unsaveProduct(product._id);
+      } else {
+        setSaved(true);
+        await saveProduct(product._id);
+      }
+    } catch (err) {
+      console.error("Save toggle failed", err);
     }
   }
 
@@ -87,6 +109,14 @@ export default function ProductCard({ product, currentUserId }: Props) {
               />
               <span className="count">{likesCount}</span>
             </button>
+            <button className="saveBtn" onClick={toggleSave} aria-pressed={saved}>
+              <Bookmark
+                size={22}
+                strokeWidth={2}
+                stroke={saved ? "#2563eb" : "#374151"}
+                fill={saved ? "#2563eb" : "none"}
+              />
+            </button>
           </div>
         </div>
       </div>
@@ -95,9 +125,9 @@ export default function ProductCard({ product, currentUserId }: Props) {
         <div className="popupOverlay" onClick={() => setShowPopup(false)}>
           <div className="popup" onClick={(e) => e.stopPropagation()}>
             <div className="popupHeader">
-              <button className="saveBtn">
-                <Bookmark size={20} />
-                Save
+              <button className="saveBtn" onClick={toggleSave}>
+                <Bookmark size={20} fill={saved ? "#2563eb" : "none"} />
+                {saved ? "Unsave" : "Save"}
               </button>
               <button className="closeBtn" onClick={() => setShowPopup(false)}>✕</button>
             </div>
@@ -118,6 +148,8 @@ export default function ProductCard({ product, currentUserId }: Props) {
           </div>
         </div>
       )}
+
+
 
       <style jsx>{`
         .card {

@@ -35,7 +35,7 @@ export default function Sidebar() {
     { label: "Home", href: "/consumer/", Icon: Home },
     { label: "Explore", href: "/consumer/explore", Icon: Compass },
     { label: "Create", href: "/consumer/create", Icon: PlusSquare },
-    { label: "Saved", href: "/consumer/saved", Icon: Bookmark },
+    { label: "Collection", href: "/consumer/collection", Icon: Bookmark },
     { label: "Profile", href: "/consumer/profile", Icon: User },
   ];
 
