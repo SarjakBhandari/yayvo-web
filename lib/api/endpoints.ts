@@ -69,7 +69,12 @@ export const API = {
     LIKE: "/api/reviews/:id/like",
     UNLIKE: "/api/reviews/:id/unlike",
     DELETE:"/api/reviews/:id"
-  }
-
-
+  },
+   COLLECTIONS: { 
+    SAVED_REVIEWS: `/api/collections/:authId/reviews`, 
+    SAVED_PRODUCTS: `/api/collections/:authId/products`, 
+    SAVE_REVIEW: "/api/collections/review/save",
+     UNSAVE_REVIEW: "/api/collections/review/unsave", 
+     SAVE_PRODUCT: "/api/collections/product/save", 
+     UNSAVE_PRODUCT: "/api/collections/product/unsave", },
 };
