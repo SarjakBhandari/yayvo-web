@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Eye, User } from "lucide-react";
+import { Eye, User, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader2 } from "lucide-react";
 
 type UserRecord = Record<string, any>;
 
@@ -17,7 +17,6 @@ type Props = {
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (size: number) => void;
   showPagination?: boolean;
-  // optional small page window for numbered pages
   pageWindow?: number;
 };
 
@@ -42,11 +41,6 @@ export default function PaginatedUserTable({
     if (next !== page) onPageChange(next);
   };
 
-  const handleSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newSize = Number(e.target.value);
-    if (onPageSizeChange) onPageSizeChange(newSize);
-  };
-
   const startIndex = (page - 1) * size + 1;
   const endIndex = Math.min(total, page * size);
 
@@ -54,332 +48,273 @@ export default function PaginatedUserTable({
     const half = Math.floor(pageWindow / 2);
     let start = Math.max(1, page - half);
     let end = Math.min(totalPages, start + pageWindow - 1);
-    if (end - start + 1 < pageWindow) {
-      start = Math.max(1, end - pageWindow + 1);
-    }
+    if (end - start + 1 < pageWindow) start = Math.max(1, end - pageWindow + 1);
     const arr: number[] = [];
     for (let i = start; i <= end; i++) arr.push(i);
     return arr;
   }, [page, totalPages, pageWindow]);
 
   return (
-    <div
-      style={{
-        backgroundColor: "#ffffff",
-        borderRadius: 12,
-        border: "1px solid #e5e7eb",
-        overflow: "hidden",
-        boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1)",
-      }}
-    >
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ backgroundColor: "#f9fafb", borderBottom: "2px solid #e5e7eb" }}>
-              {columns.map((c) => (
-                <th
-                  key={c}
-                  style={{
-                    textAlign: "left",
-                    padding: "16px 20px",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: "#6b7280",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.5px",
-                  }}
-                >
-                  {c}
-                </th>
-              ))}
-              <th
-                style={{
-                  padding: "16px 20px",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: "#6b7280",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                  textAlign: "center",
-                }}
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-          <tbody>
-            {loading ? (
+        .put-wrap {
+          background: #FAFAF8;
+          border: 1px solid #E8E4DC;
+          border-radius: 20px;
+          overflow: hidden;
+          box-shadow: 0 4px 20px rgba(26,22,18,0.06);
+          font-family: 'DM Sans', sans-serif;
+        }
+
+        /* Table */
+        .put-scroll { overflow-x: auto; }
+        .put-table { width: 100%; border-collapse: collapse; }
+
+        /* Head */
+        .put-thead tr {
+          background: #F5F0E8;
+          border-bottom: 1px solid #E8E4DC;
+        }
+        .put-th {
+          text-align: left;
+          padding: 14px 20px;
+          font-size: 10px;
+          font-weight: 600;
+          color: #9C8E7A;
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+          white-space: nowrap;
+        }
+        .put-th-center { text-align: center; }
+
+        /* Rows */
+        .put-tr {
+          border-top: 1px solid #F0EBE1;
+          transition: background 0.15s ease;
+        }
+        .put-tr:first-child { border-top: none; }
+        .put-tr:hover { background: #F5F0E8; }
+
+        .put-td { padding: 15px 20px; font-size: 14px; vertical-align: middle; }
+        .put-td-primary { color: #1A1612; font-weight: 500; }
+        .put-td-secondary { color: #7A6A52; }
+        .put-td-center { text-align: center; }
+
+        /* Avatar cell */
+        .put-avatar {
+          width: 32px; height: 32px; border-radius: 8px;
+          background: linear-gradient(135deg, #C9A96E, #8B6B3D);
+          display: inline-flex; align-items: center; justify-content: center;
+          font-size: 12px; font-weight: 600; color: #FAFAF8;
+          margin-right: 10px; flex-shrink: 0; vertical-align: middle;
+        }
+
+        /* View btn */
+        .put-view-btn {
+          display: inline-flex; align-items: center; gap: 6px;
+          padding: 7px 14px; border-radius: 10px;
+          background: #F0EBE1; color: #5A4C38;
+          border: 1px solid #E8E4DC;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 13px; font-weight: 500; cursor: pointer;
+          transition: all 0.18s ease;
+        }
+        .put-view-btn:hover {
+          background: #1A1612; color: #FAFAF8;
+          border-color: #1A1612; transform: translateY(-1px);
+          box-shadow: 0 4px 10px rgba(26,22,18,0.18);
+        }
+
+        /* Empty / loading state */
+        .put-empty {
+          padding: 56px 20px;
+          text-align: center;
+          display: flex; flex-direction: column;
+          align-items: center; gap: 14px;
+        }
+        .put-empty-icon {
+          width: 56px; height: 56px; border-radius: 16px;
+          background: #F0EBE1;
+          display: flex; align-items: center; justify-content: center;
+          color: #C9A96E;
+        }
+        .put-empty-title {
+          font-family: 'Playfair Display', serif;
+          font-size: 17px; font-weight: 700;
+          color: #1A1612; letter-spacing: -0.02em; margin: 0;
+        }
+        .put-empty-sub { font-size: 13px; color: #9C8E7A; margin: 0; }
+        .put-loading-spin { animation: putSpin 0.8s linear infinite; }
+        @keyframes putSpin { to { transform: rotate(360deg) } }
+
+        /* Pagination bar */
+        .put-pagination {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 14px 20px;
+          border-top: 1px solid #E8E4DC;
+          background: #F5F0E8;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+        .put-pagination-info { font-size: 13px; color: #9C8E7A; }
+        .put-pagination-info strong { color: #1A1612; font-weight: 600; }
+        .put-pagination-controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+        .put-pg-btn {
+          display: flex; align-items: center; justify-content: center;
+          width: 34px; height: 34px; border-radius: 9px;
+          border: 1px solid #E8E4DC; background: #FAFAF8;
+          cursor: pointer; color: #7A6A52;
+          transition: all 0.18s ease;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 13px; font-weight: 500;
+        }
+        .put-pg-btn:hover:not(:disabled) {
+          background: #1A1612; color: #FAFAF8;
+          border-color: #1A1612;
+        }
+        .put-pg-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+        .put-pg-btn.active {
+          background: #1A1612; color: #FAFAF8;
+          border-color: #1A1612; font-weight: 600;
+        }
+        .put-pg-dots { color: #B8A898; font-size: 13px; padding: 0 2px; }
+
+        .put-page-select {
+          padding: 7px 28px 7px 10px; border-radius: 9px;
+          border: 1px solid #E8E4DC; background: #FAFAF8;
+          font-family: 'DM Sans', sans-serif; font-size: 13px;
+          color: #5A4C38; cursor: pointer; outline: none;
+          appearance: none; -webkit-appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%239C8E7A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 8px center;
+          transition: border-color 0.18s ease;
+        }
+        .put-page-select:focus { border-color: #C9A96E; box-shadow: 0 0 0 3px rgba(201,169,110,0.12); }
+      `}</style>
+
+      <div className="put-wrap">
+        <div className="put-scroll">
+          <table className="put-table">
+            <thead className="put-thead">
               <tr>
-                <td
-                  colSpan={columns.length + 1}
-                  style={{ padding: "32px 20px", textAlign: "center", color: "#6b7280" }}
-                >
-                  Loading...
-                </td>
+                {columns.map((c) => <th key={c} className="put-th">{c}</th>)}
+                <th className="put-th put-th-center">Actions</th>
               </tr>
-            ) : users.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={columns.length + 1}
-                  style={{
-                    padding: "48px 20px",
-                    textAlign: "center",
-                    color: "#9ca3af",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: 12,
-                    }}
-                  >
-                    <User size={48} strokeWidth={1.5} color="#d1d5db" />
-                    <div>
-                      <div style={{ fontSize: 16, fontWeight: 600, color: "#6b7280", marginBottom: 4 }}>
-                        No users found
+            </thead>
+
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={columns.length + 1}>
+                    <div className="put-empty">
+                      <div className="put-empty-icon">
+                        <Loader2 size={24} className="put-loading-spin" />
                       </div>
-                      <div style={{ fontSize: 14, color: "#9ca3af" }}>
-                        There are no records to display
-                      </div>
+                      <p className="put-empty-sub">Loading users…</p>
                     </div>
-                  </div>
-                </td>
-              </tr>
-            ) : (
-              users.map((u, index) => {
-                const id = u._id ?? u.id ?? `${index}`;
-                const username = u.username ?? "-";
-                const email = u.email ?? u.phoneNumber ?? "-";
-                const name = u.fullName ?? u.ownerName ?? u.organizationName ?? "-";
+                  </td>
+                </tr>
+              ) : users.length === 0 ? (
+                <tr>
+                  <td colSpan={columns.length + 1}>
+                    <div className="put-empty">
+                      <div className="put-empty-icon"><User size={24} /></div>
+                      <p className="put-empty-title">No users found</p>
+                      <p className="put-empty-sub">There are no records to display</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                users.map((u, index) => {
+                  const id = u._id ?? u.id ?? `${index}`;
+                  const username = u.username ?? "-";
+                  const email = u.email ?? u.phoneNumber ?? "-";
+                  const name = u.fullName ?? u.ownerName ?? u.organizationName ?? "-";
+                  const initials = name.split(" ").filter(Boolean).slice(0, 2).map((n: string) => n[0].toUpperCase()).join("");
 
-                return (
-                  <tr
-                    key={id}
-                    style={{
-                      borderTop: index === 0 ? "none" : "1px solid #f3f4f6",
-                      transition: "background-color 0.15s",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#f9fafb";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                    }}
-                  >
-                    <td
-                      style={{
-                        padding: "16px 20px",
-                        fontSize: 14,
-                        color: "#111827",
-                        fontWeight: 500,
-                      }}
-                    >
-                      {username}
-                    </td>
+                  return (
+                    <tr key={id} className="put-tr">
+                      <td className="put-td put-td-primary">
+                        <span className="put-avatar">{initials || "?"}</span>
+                        {username}
+                      </td>
+                      <td className="put-td put-td-secondary">{email}</td>
+                      <td className="put-td put-td-secondary">{name}</td>
+                      <td className="put-td put-td-center">
+                        <button
+                          className="put-view-btn"
+                          onClick={() => onView(id)}
+                          aria-label={`View ${username}`}
+                        >
+                          <Eye size={14} />
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
 
-                    <td
-                      style={{
-                        padding: "16px 20px",
-                        fontSize: 14,
-                        color: "#6b7280",
-                      }}
-                    >
-                      {email}
-                    </td>
+        {showPagination && (
+          <div className="put-pagination">
+            <span className="put-pagination-info">
+              {total > 0 ? (
+                <>Showing <strong>{startIndex}</strong>–<strong>{endIndex}</strong> of <strong>{total}</strong></>
+              ) : "No results"}
+            </span>
 
-                    <td
-                      style={{
-                        padding: "16px 20px",
-                        fontSize: 14,
-                        color: "#374151",
-                      }}
-                    >
-                      {name}
-                    </td>
+            <div className="put-pagination-controls">
+              <button className="put-pg-btn" onClick={() => handlePageChange(1)} disabled={page <= 1} aria-label="First page">
+                <ChevronsLeft size={15} />
+              </button>
+              <button className="put-pg-btn" onClick={() => handlePageChange(page - 1)} disabled={page <= 1} aria-label="Previous page">
+                <ChevronLeft size={15} />
+              </button>
 
-                    <td
-                      style={{
-                        padding: "16px 20px",
-                        textAlign: "center",
-                      }}
-                    >
-                      <button
-                        onClick={() => onView(id)}
-                        aria-label={`View ${username}`}
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 6,
-                          padding: "8px 16px",
-                          borderRadius: 8,
-                          backgroundColor: "#eff6ff",
-                          color: "#2563eb",
-                          border: "1px solid #bfdbfe",
-                          fontSize: 14,
-                          fontWeight: 500,
-                          cursor: "pointer",
-                          transition: "all 0.2s",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = "#dbeafe";
-                          e.currentTarget.style.borderColor = "#93c5fd";
-                          e.currentTarget.style.transform = "translateY(-1px)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = "#eff6ff";
-                          e.currentTarget.style.borderColor = "#bfdbfe";
-                          e.currentTarget.style.transform = "translateY(0)";
-                        }}
-                      >
-                        <Eye size={16} strokeWidth={2} />
-                        <span>View</span>
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {showPagination && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "12px 16px",
-            borderTop: "1px solid #f3f4f6",
-            background: "#ffffff",
-            gap: 12,
-            flexWrap: "wrap",
-          }}
-        >
-          <div style={{ color: "#6b7280", fontSize: 13 }}>
-            {total > 0 ? (
-              <>
-                Showing <strong>{startIndex}</strong>–<strong>{endIndex}</strong> of <strong>{total}</strong>
-              </>
-            ) : (
-              <>No results</>
-            )}
-          </div>
-
-          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-            <button
-              onClick={() => handlePageChange(1)}
-              disabled={page <= 1}
-              aria-label="First page"
-              style={paginationButtonStyle(page <= 1)}
-            >
-              {"<<"}
-            </button>
-
-            <button
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page <= 1}
-              aria-label="Previous page"
-              style={paginationButtonStyle(page <= 1)}
-            >
-              Prev
-            </button>
-
-            {/* Numbered pages */}
-            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
               {pageNumbers[0] > 1 && (
-                <button
-                  onClick={() => handlePageChange(1)}
-                  style={pageNumberStyle(1 === page)}
-                  aria-label={`Page 1`}
-                >
-                  1
-                </button>
+                <><button className="put-pg-btn" onClick={() => handlePageChange(1)}>1</button>
+                {pageNumbers[0] > 2 && <span className="put-pg-dots">…</span>}</>
               )}
 
-              {pageNumbers[0] > 2 && <span style={{ color: "#9ca3af" }}>…</span>}
-
               {pageNumbers.map((p) => (
-                <button
-                  key={p}
-                  onClick={() => handlePageChange(p)}
-                  aria-current={p === page ? "page" : undefined}
-                  style={pageNumberStyle(p === page)}
-                >
+                <button key={p} className={`put-pg-btn${p === page ? " active" : ""}`} onClick={() => handlePageChange(p)} aria-current={p === page ? "page" : undefined}>
                   {p}
                 </button>
               ))}
 
-              {pageNumbers[pageNumbers.length - 1] < totalPages - 1 && <span style={{ color: "#9ca3af" }}>…</span>}
-
               {pageNumbers[pageNumbers.length - 1] < totalPages && (
-                <button
-                  onClick={() => handlePageChange(totalPages)}
-                  style={pageNumberStyle(totalPages === page)}
-                  aria-label={`Page ${totalPages}`}
-                >
-                  {totalPages}
-                </button>
+                <>{pageNumbers[pageNumbers.length - 1] < totalPages - 1 && <span className="put-pg-dots">…</span>}
+                <button className="put-pg-btn" onClick={() => handlePageChange(totalPages)}>{totalPages}</button></>
               )}
+
+              <button className="put-pg-btn" onClick={() => handlePageChange(page + 1)} disabled={page >= totalPages} aria-label="Next page">
+                <ChevronRight size={15} />
+              </button>
+              <button className="put-pg-btn" onClick={() => handlePageChange(totalPages)} disabled={page >= totalPages} aria-label="Last page">
+                <ChevronsRight size={15} />
+              </button>
+
+              <select
+                className="put-page-select"
+                value={size}
+                onChange={(e) => onPageSizeChange?.(Number(e.target.value))}
+                aria-label="Rows per page"
+              >
+                {[5, 10, 20, 50].map((n) => <option key={n} value={n}>{n} / page</option>)}
+              </select>
             </div>
-
-            <button
-              onClick={() => handlePageChange(page + 1)}
-              disabled={page >= totalPages}
-              aria-label="Next page"
-              style={paginationButtonStyle(page >= totalPages)}
-            >
-              Next
-            </button>
-
-            <button
-              onClick={() => handlePageChange(totalPages)}
-              disabled={page >= totalPages}
-              aria-label="Last page"
-              style={paginationButtonStyle(page >= totalPages)}
-            >
-              {">>"}
-            </button>
-
-            <select
-              value={size}
-              onChange={handleSizeChange}
-              aria-label="Rows per page"
-              style={{ padding: "8px", borderRadius: 8, border: "1px solid #e5e7eb" }}
-            >
-              <option value={5}>5 / page</option>
-              <option value={10}>10 / page</option>
-              <option value={20}>20 / page</option>
-              <option value={50}>50 / page</option>
-            </select>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
-}
-
-function paginationButtonStyle(disabled: boolean) {
-  return {
-    padding: "8px 12px",
-    borderRadius: 8,
-    border: "1px solid #e5e7eb",
-    background: disabled ? "#f3f4f6" : "#fff",
-    cursor: disabled ? "not-allowed" : "pointer",
-  } as React.CSSProperties;
-}
-
-function pageNumberStyle(active: boolean) {
-  return {
-    padding: "6px 10px",
-    borderRadius: 6,
-    border: active ? "1px solid #2563eb" : "1px solid transparent",
-    background: active ? "#eff6ff" : "transparent",
-    color: active ? "#2563eb" : "#374151",
-    cursor: "pointer",
-    fontWeight: active ? 600 : 500,
-  } as React.CSSProperties;
 }
