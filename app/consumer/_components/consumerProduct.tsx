@@ -28,7 +28,7 @@ export default function ProductCard({ product, currentUserId }: Props) {
         if (mounted) setLiked(Boolean(res?.liked));
         const savedResp = await fetchSavedProducts(1, 100);
         const savedItems = savedResp?.items ?? savedResp?.data ?? [];
-        const isSaved = savedItems.some((p: any) => String(p._id ?? p.productId) === String(product._id));
+        const isSaved = false;
         if (mounted) setSaved(isSaved);
       } catch (err) { console.error("Failed to get status", err); }
     })();
