@@ -3,11 +3,10 @@
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useUser } from "@/app/admin/_hooks/useUsers";
-import { confirmAction } from "@/app/admin/_utils/confirm";
 import { deleteConsumer, uploadConsumerPicture } from "@/lib/api/admin";
-import AdminSidebar from "@/app/admin/_components/AdminSideBar";
+import AdminShell from "@/app/admin/_components/AdminShell";
 import UserDetailCard from "@/app/admin/_components/UserDetailCard";
-
+import { toast } from "react-toastify";
 
 export default function ConsumerDetail() {
   const params = useParams();
@@ -15,36 +14,45 @@ export default function ConsumerDetail() {
   const router = useRouter();
   const { user, setUser, loading } = useUser(id, "consumer");
 
-  if (loading) return <p style={{ padding: 24 }}>Loading...</p>;
-  console.log(user);
-  if (!user) return <p style={{ padding: 24 }}>Not found</p>;
+  if (loading) return <AdminShell title="Consumer" back="/admin"><SkeletonState /></AdminShell>;
+  if (!user)   return <AdminShell title="Consumer" back="/admin"><NotFound /></AdminShell>;
 
   async function handleDelete() {
     await deleteConsumer(user.authId);
+    toast.success("Consumer deleted");
     router.push("/admin");
   }
 
-  function handleEdit() { router.push(`/admin/consumers/${id}/edit`); }
-
   async function handleUpload(file: File) {
-
     const res = await uploadConsumerPicture(user.authId, file);
-
     const newProfile = res.profilePicture ?? res.path ?? res.profilePictureUrl;
-
-setUser((prev: any) => ({ ...prev, profilePicture: newProfile }));
-alert("successfully uploded profile picture");
-            router.push(`/admin/`);
-
-}
+    setUser((prev: any) => ({ ...prev, profilePicture: newProfile }));
+    router.refresh();
+  }
 
   return (
-    <div style={{ display: "flex", gap: 24 }}>
-      <AdminSidebar />
-      <main style={{ flex: 1, padding: 24 }}>
-        <h2>Consumer</h2>
-        <UserDetailCard user={{ ...user, _role: "consumer" }} onEdit={handleEdit} onDelete={handleDelete} onUploadPicture={handleUpload} />
-      </main>
-    </div>
+    <AdminShell title={user.fullName ?? user.username ?? "Consumer"} eyebrow="User Detail" back="/admin">
+      <UserDetailCard
+        user={{ ...user, _role: "consumer" }}
+        onEdit={() => router.push(`/admin/consumers/${id}/edit`)}
+        onDelete={handleDelete}
+        onUploadPicture={handleUpload}
+      />
+    </AdminShell>
   );
+}
+
+function SkeletonState() {
+  return (
+    <>
+      <style>{`@keyframes cpSkimmer { 0%,100%{opacity:0.4} 50%{opacity:1} }`}</style>
+      {[200, 300, 140].map((w, i) => (
+        <div key={i} style={{ height: 14, width: w, borderRadius: 8, background: "#E8E4DC", animation: "cpSkimmer 1.4s infinite", marginBottom: 10 }} />
+      ))}
+    </>
+  );
+}
+
+function NotFound() {
+  return <p style={{ color: "#9C8E7A", fontSize: 14 }}>Consumer not found.</p>;
 }
