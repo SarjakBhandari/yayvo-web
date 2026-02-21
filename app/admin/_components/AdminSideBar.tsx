@@ -118,9 +118,8 @@ export default function AdminSidebar(): JSX.Element {
 
       <aside className="asb" aria-label="Admin navigation">
         <a href="/admin" className="asb-logo">
-          <div className="asb-logo-mark"><div className="asb-logo-dot" /></div>
           <div>
-            <div className="asb-logo-text">Yayvo</div>
+            <div className="asb-logo-text">YAYVO</div>
           </div>
           <span className="asb-logo-badge">Admin</span>
         </a>
