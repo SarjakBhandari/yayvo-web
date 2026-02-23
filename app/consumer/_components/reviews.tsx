@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { getReviewsPaginated, updateReview, deleteReview } from "@/lib/api/reviews";
+import { getReviewsByAuthor, updateReview, deleteReview } from "@/lib/api/reviews";
 import { Edit2, Trash2, X, FileText, Loader2, Save, AlertTriangle } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -19,8 +19,10 @@ export default function ConsumerReviews({ authId }: { authId: string }) {
     (async () => {
       setLoading(true);
       try {
-        const resp = await getReviewsPaginated({ page: 1, size: 20, authorId: authId });
-        setReviews(resp?.items ?? []);
+        console.log(authId);
+        const resp = await getReviewsByAuthor(authId);
+        const reviewsArray = Array.isArray(resp) ? resp : resp?.data ?? resp?.items ?? [];
+        setReviews(reviewsArray);
       } catch {
         toast.error("Failed to load reviews.");
       } finally {

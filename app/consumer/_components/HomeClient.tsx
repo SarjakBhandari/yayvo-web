@@ -25,11 +25,9 @@ export default function HomeClient({ userData }: { userData: any | null }) {
       try {
         if (!userData) return;
         const authId = resolveAuthId(userData);
+        console.log(authId);
         if (!authId) return;
-        const cons = await getConsumerByAuthId(authId);
-        const consumerObj = cons?.data ?? cons;
-        const cid = consumerObj?.id ?? consumerObj?._id ?? null;
-        setConsumerId(cid);
+        setConsumerId(authId);
       } catch (err) {
         console.error("HomeClient: failed to load consumer", err);
       }

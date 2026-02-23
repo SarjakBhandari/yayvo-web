@@ -92,6 +92,7 @@ export default function ReviewCard({ review, currentUserId }: Props) {
 
   async function handleToggleLike() {
     if (!currentUserId) { alert("Please log in to like reviews."); return; }
+    console.log(currentUserId);
     if (!reviewId) return;
     const prevLiked = liked;
     const prevCount = likesCount;
