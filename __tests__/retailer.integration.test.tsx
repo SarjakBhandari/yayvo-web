@@ -18,6 +18,12 @@ jest.mock("@/lib/api/products", () => ({
   uploadProductImage: jest.fn().mockResolvedValue({ success: true }),
 }));
 
+// cookie helper returns user info; avoid Next.js request-scope errors in tests
+jest.mock("@/lib/cookie", () => ({
+  getUserData: jest.fn().mockResolvedValue({ id: "auth_r1", authId: "auth_r1" }),
+  getAuthToken: jest.fn().mockResolvedValue("token"),
+}));
+
 jest.mock("@/lib/api/retailer", () => ({
   // return the raw object that the real helper returns (not wrapped in `data`)
   getRetailerByAuthId: jest.fn().mockResolvedValue({
@@ -114,10 +120,13 @@ describe("Retailer integration (simple)", () => {
 
   test("AddProductForm renders and submits", async () => {
     const productsApi = require("@/lib/api/products");
-    render(<AddProductForm />);
-
-    // make sure effect runs and has time to load the retailer info
-    await waitFor(() => expect(productsApi.createProduct).not.toHaveBeenCalled());
+    render(
+      <AddProductForm
+        initialRetailerAuthId="auth_r1"
+        initialRetailerName="Retailer Co"
+        initialRetailerIcon="/icons/r1.png"
+      />
+    );
 
     // fill required fields and submit
     const titleInput = screen.getByPlaceholderText(/Give your product a title/i);
