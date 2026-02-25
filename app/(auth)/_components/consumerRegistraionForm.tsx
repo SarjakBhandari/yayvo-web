@@ -175,7 +175,7 @@ export default function ConsumerRegisterForm() {
     toast.success("Registration successful! Welcome to Yayvo.");
   });
 
-  const [gender, setGender] = useState("");
+  const [gender, setGender] = useState("Male");
 
   useEffect(() => {
     if (errs) toast.error(errs);
