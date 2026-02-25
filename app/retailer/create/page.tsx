@@ -96,7 +96,10 @@ export default async function RetailerCreatePage() {
           </div>
           <AddProductForm
             initialRetailerAuthId={authId}
-            initialRetailerName={retailer?.ownerName || retailer?.organizationName || ""}
+            initialRetailerName={
+              retailer?.ownerName || retailer?.organizationName || ""
+            }
+            initialRetailerIcon={retailer?.profilePicture || ""}
           />
         </main>
       </div>

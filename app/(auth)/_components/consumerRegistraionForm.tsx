@@ -266,13 +266,21 @@ export default function ConsumerRegisterForm() {
               <div className="rf-field">
                 <label className="rf-label">Gender</label>
                 <div className="rf-radio-group">
-                  {["Male", "Female", "Other"].map((g) => (
-                    <label key={g} className={`rf-radio-label${gender === g ? " checked" : ""}`}>
-                      <input type="radio" value={g} {...register("gender")} onChange={(e) => setGender(e.target.value)} />
-                      <span className="rf-radio-dot"><span /></span>
-                      {g}
-                    </label>
-                  ))}
+                {["Male", "Female", "Other"].map((g) => (
+  <label key={g} className={`rf-radio-label${gender === g ? " checked" : ""}`}>
+    <input
+      type="radio"
+      value={g}
+      {...register("gender")}
+      onChange={(e) => {
+        setGender(e.target.value);
+        register("gender").onChange(e); // ← call RHF's onChange too
+      }}
+    />
+    <span className="rf-radio-dot"><span /></span>
+    {g}
+  </label>
+))}
                 </div>
                 {errors.gender && <span className="rf-err">{errors.gender.message}</span>}
               </div>
