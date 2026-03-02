@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - HOST=0.0.0.0          # ensure Next.js listens on all interfaces
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    command: npm run dev -- -H 0.0.0.0
+    restart: unless-stopped
+    tty: true
