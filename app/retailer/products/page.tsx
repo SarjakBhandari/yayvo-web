@@ -1,5 +1,4 @@
-// src/app/retailer/products/page.tsx
-import React from "react";
+"use server"
 import Sidebar from "../_components/sidebar";
 import { getUserData } from "../../../lib/cookie";
 import type { Product } from "../_schemas/product.schema";

@@ -4,7 +4,6 @@ import { login, registerConsumer, registerRetailer, requestPasswordReset, resetP
 import { setAuthToken, setUserData, clearAuthCookies } from "../cookie";
 import axios from "axios";
 import { API } from "../api/endpoints";
-// import {useAuth} from "@/context/AuthContext";
 
 export const handleRegisterConsumer = async (
   formData: any,
