@@ -19,7 +19,6 @@ export default function ConsumerReviews({ authId }: { authId: string }) {
     (async () => {
       setLoading(true);
       try {
-        console.log(authId);
         const resp = await getReviewsByAuthor(authId);
         const reviewsArray = Array.isArray(resp) ? resp : resp?.data ?? resp?.items ?? [];
         setReviews(reviewsArray);
