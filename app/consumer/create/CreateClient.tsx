@@ -57,7 +57,7 @@ export default function CreateClient({ userData }: { userData: any | null }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    const consumerId = consumer?._id ?? consumer?.id;
+    const consumerId = consumer?.authId;
     if (!consumerId) { setError("Could not determine your consumer profile. Please re-login."); return; }
     if (!title.trim()) { setError("Title is required."); return; }
 

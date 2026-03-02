@@ -25,5 +25,4 @@ console.error = (...args: any[]) => {
   } catch (e) {
     // ignore
   }
-  _consoleError.apply(console, args);
 };

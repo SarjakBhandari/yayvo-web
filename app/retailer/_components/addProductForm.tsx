@@ -13,21 +13,32 @@ export default function AddProductForm({
   onCreated,
   initialRetailerAuthId,
   initialRetailerName,
+  initialRetailerIcon,
 }: {
   onCreated?: () => void;
   initialRetailerAuthId?: string | null;
   initialRetailerName?: string | null;
+  initialRetailerIcon?: string | null;
 }) {
   const {
     title, description, targetSentiment, file, errors, isSubmitting,
     handleTitle, handleDescription, handleFile, toggleSentiment, handleSubmit,
-    setRetailerAuthId, setRetailerName,
+    setRetailerAuthId, setRetailerName, setRetailerIcon,
+    retailerIcon,
   } = useCreateProduct(() => { onCreated?.(); });
 
   useEffect(() => {
     if (initialRetailerAuthId) setRetailerAuthId(initialRetailerAuthId);
     if (initialRetailerName)   setRetailerName(initialRetailerName);
-  }, [initialRetailerAuthId, initialRetailerName, setRetailerAuthId, setRetailerName]);
+    if (initialRetailerIcon)   setRetailerIcon(initialRetailerIcon);
+  }, [
+    initialRetailerAuthId,
+    initialRetailerName,
+    initialRetailerIcon,
+    setRetailerAuthId,
+    setRetailerName,
+    setRetailerIcon,
+  ]);
 
   const selectedSet = useMemo(() => new Set(targetSentiment), [targetSentiment]);
 

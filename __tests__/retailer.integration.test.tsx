@@ -1,6 +1,7 @@
 // __tests__/retailer.integration.test.tsx
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn(), replace: jest.fn(), prefetch: jest.fn(), back: jest.fn() }),
@@ -17,9 +18,22 @@ jest.mock("@/lib/api/products", () => ({
   uploadProductImage: jest.fn().mockResolvedValue({ success: true }),
 }));
 
+// cookie helper returns user info; avoid Next.js request-scope errors in tests
+jest.mock("@/lib/cookie", () => ({
+  getUserData: jest.fn().mockResolvedValue({ id: "auth_r1", authId: "auth_r1" }),
+  getAuthToken: jest.fn().mockResolvedValue("token"),
+}));
+
 jest.mock("@/lib/api/retailer", () => ({
-  getRetailerByAuthId: jest.fn().mockResolvedValue({ data: { _id: "r1", fullName: "Retailer" } }),
-  getRetailerById: jest.fn().mockResolvedValue({ data: null }),
+  // return the raw object that the real helper returns (not wrapped in `data`)
+  getRetailerByAuthId: jest.fn().mockResolvedValue({
+    _id: "r1",
+    authId: "auth_r1",
+    organizationName: "Retailer Co",
+    ownerName: "Owner Name",
+    profilePicture: "/icons/r1.png",
+  }),
+  getRetailerById: jest.fn().mockResolvedValue(null),
   uploadRetailerPicture: jest.fn().mockResolvedValue({ success: true }),
 }));
 
@@ -67,11 +81,22 @@ describe("Retailer integration (simple)", () => {
     });
   });
 
-  test("ProductCard renders basic info", async () => {
-    const sample = { _id: "p1", title: "P", description: "d", retailerAuthId: "r1" };
+  test("ProductCard renders basic info and retailer info", async () => {
+    const sample = {
+      _id: "p1",
+      title: "P",
+      description: "d",
+      retailerAuthId: "r1",
+      retailerName: "Retailer Co",
+      retailerIcon: "/icon.png",
+    };
     render(<ProductCard product={sample} />);
     await waitFor(() => {
       expect(screen.queryByText(/P/) || screen.queryByTestId("mock-product-card")).toBeTruthy();
+    });
+    // check retailer metadata renders if component is real
+    await waitFor(() => {
+      expect(screen.queryByText(/Retailer Co/)).toBeTruthy();
     });
   });
 
@@ -94,10 +119,25 @@ describe("Retailer integration (simple)", () => {
   });
 
   test("AddProductForm renders and submits", async () => {
-    render(<AddProductForm />);
-    await waitFor(() => {
-      expect(screen.queryByTestId("mock-add-product") || document.body).toBeTruthy();
-    });
+    const productsApi = require("@/lib/api/products");
+    render(
+      <AddProductForm
+        initialRetailerAuthId="auth_r1"
+        initialRetailerName="Retailer Co"
+        initialRetailerIcon="/icons/r1.png"
+      />
+    );
+
+    // fill required fields and submit
+    const titleInput = screen.getByPlaceholderText(/Give your product a title/i);
+    await userEvent.type(titleInput, "My product");
+    const submit = screen.getByRole("button", { name: /create product/i });
+    await userEvent.click(submit);
+
+    await waitFor(() => expect(productsApi.createProduct).toHaveBeenCalled());
+    const payload = productsApi.createProduct.mock.calls[0][0];
+    expect(payload.retailerName).toBe("Retailer Co");
+    expect(payload.retailerIcon).toBe("/icons/r1.png");
   });
 
   test("RetailerProductsGrid and Sidebar render", async () => {

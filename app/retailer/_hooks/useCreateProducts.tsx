@@ -28,8 +28,29 @@ export function useCreateProduct(onCreated?: (created: any) => void) {
 
         // Fetch retailer data from API
         const retailer = await getRetailerByAuthId(user.id);
-        setRetailerName(retailer?.name || "");
-        setRetailerIcon(retailer?.profilePicture || "");
+
+        // the backend has shipped multiple variants over time (ownerName,
+        // organizationName, fullName, etc.). pick the one that actually
+        // exists so we don't overwrite a valid initial value with an empty
+        // string.  the create page also passes in an initialRetailerName
+        // from server-side props but the effect would blow that away, which
+        // is what kept the name/icon from ever being included in the payload.
+        const resolvedName =
+          retailer?.organizationName ??
+          retailer?.fullName ??
+          retailer?.ownerName ??
+          retailer?.name ??
+          "";
+        if (resolvedName) {
+          setRetailerName(resolvedName);
+        }
+
+        // profilePicture is the field used everywhere else (see
+        // profilePanel).  only override if we actually received a value so a
+        // previously provided `initialRetailerIcon` isn’t lost.
+        if (retailer?.profilePicture) {
+          setRetailerIcon(retailer.profilePicture);
+        }
       } catch (err) {
         console.error("Failed to fetch retailer data", err);
         toast.error("Failed to fetch retailer data");
@@ -57,6 +78,14 @@ export function useCreateProduct(onCreated?: (created: any) => void) {
     if (!retailerAuthId) {
       setErrors((e: any) => ({ ...e, general: "Retailer not found" }));
       return toast.error("Retailer not found");
+    }
+
+    if (!retailerName) {
+      // this can happen if the form is submitted before the async user/retailer
+      // fetch completes.  prevent products from being created with empty
+      // retailer metadata.
+      setErrors((e: any) => ({ ...e, general: "Retailer information is loading" }));
+      return toast.error("Retailer information is loading");
     }
 
     setIsSubmitting(true);

@@ -1,33 +1,14 @@
-# Multi-stage Dockerfile for Next.js production build
-# Build stage
-FROM node:24.13.0 AS builder
+FROM node:24.13.0
+
 WORKDIR /app
 
-# Install deps
 COPY package*.json ./
-RUN npm install --production=false --silent
+RUN npm install
 
-# Copy source and build
 COPY . .
-RUN npm run build
 
-# Runtime stage
-FROM node:24.13.0 AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-ENV PORT=3000
+ENV NODE_ENV=development
+ENV NEXT_PUBLIC_API_BASE_URL=http://host.docker.internal:5050
+EXPOSE 3000
 
-# Copy necessary files from builder
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.js ./next.config.js
-
-EXPOSE ${PORT}
-
-# Use a non-root user for safety
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-USER appuser
-
-CMD ["npm", "start"]
+CMD ["npm", "run","dev"]
